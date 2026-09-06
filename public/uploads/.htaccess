@@ -1,0 +1,6 @@
+# Prevent PHP execution in the uploads directory (file upload security).
+# Even if a malicious .php file is uploaded, it cannot be executed.
+php_flag engine off
+<FilesMatch "\.(?i:php|php3|php4|php5|php7|phtml|pl|py|cgi)$">
+    Require all denied
+</FilesMatch>

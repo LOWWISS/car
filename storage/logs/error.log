@@ -1,0 +1,18 @@
+[2026-08-26 16:14:34] Exception: Call to undefined method Bid::countWonByBidder() @ C:\wamp64\www\car\app\Controllers\DashboardController.php:39
+[2026-08-26 16:14:35] Exception: Call to undefined method Bid::countWonByBidder() @ C:\wamp64\www\car\app\Controllers\DashboardController.php:39
+[2026-08-26 16:14:35] Exception: Call to undefined method Bid::countWonByBidder() @ C:\wamp64\www\car\app\Controllers\DashboardController.php:39
+[2026-08-26 16:14:35] Exception: Call to undefined method Bid::countWonByBidder() @ C:\wamp64\www\car\app\Controllers\DashboardController.php:39
+[2026-08-26 17:21:17] Mail send failed (mail()) to bob@car.local
+[2026-08-26 17:22:55] Mail send failed (mail()) to bob@car.local
+[2026-08-26 17:22:57] Mail send failed (mail()) to bob@car.local
+[2026-08-26 17:23:40] Mail send failed (mail()) to bob@car.local
+[2026-08-26 17:23:42] Mail send failed (mail()) to bob@car.local
+[2026-08-27 15:53:36] Exception: Call to undefined method Auth::refreshUser() @ C:\wamp64\www\car\app\Controllers\ProfileController.php:54
+[2026-08-27 15:53:36] Exception: Logger::audit(): Argument #2 ($details) must be of type array, null given, called in C:\wamp64\www\car\app\Controllers\ProfileController.php on line 89 @ C:\wamp64\www\car\app\Core\Logger.php:29
+[2026-08-27 15:53:37] Exception: Logger::audit(): Argument #2 ($details) must be of type array, null given, called in C:\wamp64\www\car\app\Controllers\ProfileController.php on line 93 @ C:\wamp64\www\car\app\Core\Logger.php:29
+[2026-08-27 15:53:37] Exception: Call to undefined method Auth::refreshUser() @ C:\wamp64\www\car\app\Controllers\ProfileController.php:54
+[2026-08-27 15:53:37] Exception: Logger::audit(): Argument #2 ($details) must be of type array, null given, called in C:\wamp64\www\car\app\Controllers\ProfileController.php on line 93 @ C:\wamp64\www\car\app\Core\Logger.php:29
+[2026-08-27 15:55:17] Exception: Call to undefined method Auth::refreshUser() @ C:\wamp64\www\car\app\Controllers\ProfileController.php:54
+[2026-08-27 15:57:07] Exception: Call to undefined method Auth::refreshUser() @ C:\wamp64\www\car\app\Controllers\ProfileController.php:54
+[2026-08-27 15:58:43] Exception: Call to undefined method Auth::refreshUser() @ C:\wamp64\www\car\app\Controllers\ProfileController.php:54
+[2026-09-02 14:39:33] Exception: Call to undefined method User::getFailedAttempts() @ C:\wamp64\www\car\app\Controllers\AuthController.php:50

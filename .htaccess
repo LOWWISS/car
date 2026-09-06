@@ -1,0 +1,19 @@
+# Root .htaccess: forward all traffic to the public/ directory so the
+# web root is effectively /public (keeps app/, config/, .env out of web root).
+
+RewriteEngine On
+
+# Block direct access to sensitive directories and files (even though they
+# exist on disk). Without this, Apache would execute app/*.php directly,
+# bypassing the front controller (no autoloader, config, session, security).
+RewriteRule ^app/ - [F,L]
+RewriteRule ^config/ - [F,L]
+RewriteRule ^storage/ - [F,L]
+RewriteRule ^database/ - [F,L]
+RewriteRule ^\.env$ - [F,L]
+
+# Forward empty root and all non-file/non-dir requests to public/
+RewriteRule ^$ public/ [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ public/$1 [L]

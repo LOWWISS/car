@@ -1,0 +1,26 @@
+# Route everything to index.php (front controller)
+RewriteEngine On
+
+# Force HTTPS in production (uncomment when deployed with TLS)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Deny access to sensitive files
+RewriteRule ^\.env$ - [F,L]
+RewriteRule ^config/ - [F,L]
+RewriteRule ^app/ - [F,L]
+RewriteRule ^storage/ - [F,L]
+RewriteRule ^database/ - [F,L]
+
+# Send all non-file, non-dir requests to the front controller
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]
+
+# Security headers (also set in PHP for non-Apache servers)
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "DENY"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>
