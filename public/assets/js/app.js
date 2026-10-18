@@ -92,11 +92,28 @@
     } else if (action === 'mobile-sidebar') {
       e.preventDefault();
       toggleMobileSidebar();
+    } else if (action === 'guest-menu') {
+      e.preventDefault();
+      var gm = document.getElementById('guestMenu');
+      if (gm) gm.classList.toggle('hidden');
     }
   });
 
   // Restore collapsed state on load
   applySidebarState();
+
+  // ---- Landing page header: dark glass over hero -> white glass on scroll ----
+  // The header is outside <main>, so PJAX swaps leave it in place. Keying off
+  // the #landingHero element keeps the state correct after PJAX navigation.
+  var siteHeader = document.getElementById('siteHeader');
+  function updateHeaderState() {
+    if (!siteHeader) return;
+    var overHero = !!document.getElementById('landingHero') && window.scrollY < 40;
+    siteHeader.classList.toggle('header-dark', overHero);
+    siteHeader.classList.toggle('is-scrolled', window.scrollY > 8);
+  }
+  window.addEventListener('scroll', updateHeaderState, { passive: true });
+  updateHeaderState();
 
   // ---- Countdown timers (poll DOM every second, picks up new elements) ----
   function fmt(ms) {
@@ -344,6 +361,7 @@
     bindBidForm();
     startBidPolling();
     tickCountdowns();
+    updateHeaderState();
   }
 
   // ---- Notification badge updater ----

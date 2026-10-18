@@ -6,7 +6,7 @@
 </div><!-- /sidebar + right column wrapper -->
 <?php endif; ?>
 
-<script>window.APP_BASE = <?= json_encode(rtrim(Config::get('APP_URL','/car'),'/')) ?>;</script>
-<script src="<?= rtrim(Config::get('APP_URL','/car'),'/') ?>/assets/js/app.js?v=12"></script>
+<script nonce="<?= e(SecurityHeaders::cspNonce()) ?>">window.APP_BASE = <?= json_encode(rtrim(Config::get('APP_URL','/car'),'/')) ?>;</script>
+<script src="<?= rtrim(Config::get('APP_URL','/car'),'/') ?>/assets/js/app.js?v=13"></script>
 </body>
 </html>

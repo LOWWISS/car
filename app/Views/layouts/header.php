@@ -16,6 +16,23 @@ if ($currentUser) {
 }
 $pageTitle = $pageTitle ?? 'Car Auction System';
 
+// Current path — used for guest navbar active-link highlighting and to
+// detect the landing page (dark-glass header over the hero).
+try { $currentPath = (new Request())->path(); } catch (\Throwable $e) { $currentPath = '/'; }
+$guestLinks = [
+    '/'              => 'Home',
+    '/cars'          => 'Browse',
+    '/cars/bidding'  => 'Bidding',
+    '/cars/featured' => 'Featured Cars',
+];
+$activeLink = '';
+$bestMatch = -1;
+foreach ($guestLinks as $p => $label) {
+    $matches = $p === '/' ? $currentPath === '/'
+                          : ($currentPath === $p || str_starts_with($currentPath, $p . '/'));
+    if ($matches && strlen($p) > $bestMatch) { $bestMatch = strlen($p); $activeLink = $p; }
+}
+
 // Page subtitle/description map — shown in the navbar header.
 // For dynamic subtitles, falls back to role-aware logic below.
 $pageSubtitle = $pageSubtitle ?? '';
@@ -88,7 +105,7 @@ if ($pageSubtitle === '' && $currentUser) {
     </script>
 
     <!-- App CSS (reusable component classes via @apply) -->
-    <link rel="stylesheet" href="<?= e($assetBase) ?>/css/app.css?v=4">
+    <link rel="stylesheet" href="<?= e($assetBase) ?>/css/app.css?v=6">
 </head>
 <body class="h-full bg-slate-50 text-slate-800 font-sans antialiased min-h-screen">
 
@@ -178,35 +195,36 @@ if ($pageSubtitle === '' && $currentUser) {
 <?php endif; ?>
 
 <!-- ===== Navbar ===== -->
-<header id="siteHeader" class="fixed top-0 left-0 right-0 <?= Auth::check() ? 'lg:left-64' : '' ?> z-40 bg-white/90 backdrop-blur border-b border-slate-200">
+<header id="siteHeader" class="fixed top-0 left-0 right-0 <?= Auth::check() ? 'lg:left-64' : '' ?> z-40 bg-white/90 backdrop-blur border-b border-slate-200<?= $currentPath === '/' ? ' header-dark' : '' ?>">
   <nav class="px-4 sm:px-6 lg:px-8 h-16 flex items-center gap-4">
     <?php if (Auth::check()): ?>
       <!-- Mobile sidebar toggle (logged-in only) -->
-      <button type="button" data-toggle="mobile-sidebar" class="lg:hidden p-2 rounded-lg hover:bg-slate-100" aria-label="Toggle menu">
-        <svg class="w-6 h-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <button type="button" data-toggle="mobile-sidebar" class="lg:hidden p-2 rounded-lg hdr-icon-btn text-slate-600 hover:bg-slate-100 transition" aria-label="Toggle menu">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
         </svg>
       </button>
 
       <!-- Page indicator (title + subtitle) -->
       <div id="navPageTitle" class="min-w-0 hidden sm:block">
-        <div class="text-sm font-semibold text-slate-800 truncate leading-tight"><?= e($pageTitle) ?></div>
-        <div id="navPageSubtitle" class="text-xs text-slate-400 truncate leading-tight"><?= e($pageSubtitle) ?></div>
+        <div class="text-sm font-semibold hdr-title text-slate-800 truncate leading-tight"><?= e($pageTitle) ?></div>
+        <div id="navPageSubtitle" class="text-xs hdr-sub text-slate-400 truncate leading-tight"><?= e($pageSubtitle) ?></div>
       </div>
     <?php else: ?>
       <!-- Logo (guests only) -->
-      <span class="flex items-center gap-2 font-bold text-lg text-brand-dark shrink-0 cursor-default select-none">
-        <svg class="w-7 h-7 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3 13l2-5h14l2 5M5 13h14v5H5z M7 18v2 M17 18v2"/>
-        </svg>
-        CarAuction
-      </span>
+      <a href="<?= $appUrl ?>/" class="flex items-center gap-2.5 shrink-0 group" aria-label="CarAuction home">
+        <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand to-blue-500 flex items-center justify-center shadow-md shadow-brand/25 transition duration-200 group-hover:shadow-lg group-hover:shadow-brand/40 group-hover:scale-105">
+          <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13l2-5h14l2 5M5 13h14v5H5z M7 18v2 M17 18v2"/>
+          </svg>
+        </span>
+        <span class="font-bold text-lg tracking-tight hdr-logo text-slate-900">Car<span class="text-brand hdr-logo-accent">Auction</span></span>
+      </a>
       <!-- Center: Navigation (guests only, no sidebar) -->
-      <div class="flex items-center justify-center gap-1 mx-auto">
-        <a href="<?= $appUrl ?>/" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-brand hover:bg-slate-100 transition">Home</a>
-        <a href="<?= $appUrl ?>/cars" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-brand hover:bg-slate-100 transition">Browse</a>
-        <a href="<?= $appUrl ?>/cars/bidding" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-brand hover:bg-slate-100 transition">Bidding</a>
-        <a href="<?= $appUrl ?>/cars/featured" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-brand hover:bg-slate-100 transition">Featured Cars</a>
+      <div class="hidden md:flex items-center justify-center gap-1 mx-auto">
+        <?php foreach ($guestLinks as $p => $label): ?>
+          <a href="<?= $appUrl . $p ?>" class="nav-link relative px-3.5 py-2 rounded-lg text-sm font-medium transition<?= $activeLink === $p ? ' active' : '' ?>"><?= e($label) ?></a>
+        <?php endforeach; ?>
       </div>
     <?php endif; ?>
 
@@ -215,8 +233,8 @@ if ($pageSubtitle === '' && $currentUser) {
 
       <?php if (Auth::check()): ?>
         <!-- Notifications bell -->
-        <a href="<?= $appUrl ?>/notifications" class="relative p-2 rounded-full hover:bg-slate-100" aria-label="Notifications">
-          <svg class="w-6 h-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <a href="<?= $appUrl ?>/notifications" class="relative p-2 rounded-full hdr-icon-btn text-slate-600 hover:bg-slate-100 transition" aria-label="Notifications">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1"/>
           </svg>
           <?php if ($unread > 0): ?>
@@ -226,7 +244,7 @@ if ($pageSubtitle === '' && $currentUser) {
         <!-- Logout button -->
         <form method="post" action="<?= $appUrl ?>/logout">
           <input type="hidden" name="_csrf_token" value="<?= e(Csrf::token()) ?>">
-          <button type="submit" class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-auction border border-red-200 hover:bg-red-50 transition" aria-label="Log out" title="Log out">
+          <button type="submit" class="hdr-logout flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-auction border border-red-200 hover:bg-red-50 transition" aria-label="Log out" title="Log out">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
             </svg>
@@ -234,11 +252,32 @@ if ($pageSubtitle === '' && $currentUser) {
           </button>
         </form>
       <?php else: ?>
-        <a href="<?= $appUrl ?>/register" class="text-sm font-medium text-slate-700 hover:text-brand">Sign up</a>
-        <a href="<?= $appUrl ?>/login" class="btn-primary text-sm">Log in</a>
+        <a href="<?= $appUrl ?>/login" class="hdr-login hidden sm:inline-block text-sm font-medium text-slate-700 hover:text-brand px-3 py-2 transition">Log in</a>
+        <a href="<?= $appUrl ?>/register" class="text-sm font-semibold px-5 py-2 rounded-full text-white bg-gradient-to-r from-brand to-blue-500 shadow-md shadow-brand/25 hover:shadow-lg hover:shadow-brand/40 hover:brightness-110 hover:-translate-y-px transition">Get Started</a>
+        <!-- Mobile menu toggle (guests only) -->
+        <button type="button" data-toggle="guest-menu" class="md:hidden p-2 rounded-lg hdr-icon-btn text-slate-600 hover:bg-slate-100 transition" aria-label="Toggle menu">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
       <?php endif; ?>
     </div>
   </nav>
+
+  <?php if (Auth::guest()): ?>
+  <!-- Mobile dropdown menu (guests only) -->
+  <div id="guestMenu" class="md:hidden hidden bg-white/95 backdrop-blur-xl border-t border-slate-200 shadow-lg">
+    <div class="px-4 py-3 space-y-1">
+      <?php foreach ($guestLinks as $p => $label): ?>
+        <a href="<?= $appUrl . $p ?>" class="nav-link relative block px-3.5 py-2.5 rounded-lg text-sm font-medium transition<?= $activeLink === $p ? ' active' : '' ?>"><?= e($label) ?></a>
+      <?php endforeach; ?>
+      <div class="pt-2 flex gap-2">
+        <a href="<?= $appUrl ?>/login" class="btn-outline flex-1 justify-center">Log in</a>
+        <a href="<?= $appUrl ?>/register" class="btn-primary flex-1 justify-center">Get Started</a>
+      </div>
+    </div>
+  </div>
+  <?php endif; ?>
 </header>
 
 <!-- ===== Flash messages ===== -->

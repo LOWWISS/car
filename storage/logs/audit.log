@@ -306,3 +306,8 @@
 [2026-09-06 02:56:15] user=2 ip=::1 action=logout details={"user":"jane@car.local"}
 [2026-09-06 02:56:19] user=1 ip=::1 action=login details={"user":"admin@car.local"}
 [2026-09-06 03:08:47] user=1 ip=::1 action=logout details={"user":"admin@car.local"}
+[2026-09-15 09:36:23] user=2 ip=::1 action=auction_closed_no_sale details={"car":19,"reason":"no bids were placed"}
+[2026-10-18 13:25:44] user=2 ip=::1 action=login details={"user":"jane@car.local"}
+[2026-10-18 13:26:09] user=2 ip=::1 action=listing_update details={"car":19}
+[2026-10-18 13:26:10] user=2 ip=::1 action=logout details={"user":"jane@car.local"}
+[2026-10-18 13:26:28] user=2 ip=::1 action=login details={"user":"jane@car.local"}
