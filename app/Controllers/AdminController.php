@@ -15,9 +15,9 @@ final class AdminController extends BaseController
 
         $pending = $carModel->pendingApprovals();
         $users = $userModel->allWithCounts();
-        $logs = $auditModel->recent(30);
+        $logs = $auditModel->recent(15);
+        $recentListings = $carModel->recentWithDetails(25);
 
-        // Simple analytics
         $db = Database::getInstance();
         $totalCars = $carModel->count();
         $totalUsers = $userModel->count();
@@ -25,17 +25,76 @@ final class AdminController extends BaseController
         $activeAuctions = (int) $db->query("SELECT COUNT(*) FROM cars WHERE status='active'")->fetchColumn();
         $grossGMV = (float) $db->query("SELECT COALESCE(SUM(bid_amount),0) FROM bids")->fetchColumn();
 
+        // Trend metrics: last 30 days vs the 30 days before that.
+        $pair = function (string $table, string $sumCol = null) use ($db): array {
+            $cur = $sumCol
+                ? "COALESCE(SUM(CASE WHEN created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) THEN $sumCol END), 0)"
+                : "SUM(CASE WHEN created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) THEN 1 ELSE 0 END)";
+            $prev = $sumCol
+                ? "COALESCE(SUM(CASE WHEN created_at < DATE_SUB(CURDATE(), INTERVAL 30 DAY) THEN $sumCol END), 0)"
+                : "SUM(CASE WHEN created_at < DATE_SUB(CURDATE(), INTERVAL 30 DAY) THEN 1 ELSE 0 END)";
+            $row = $db->query(
+                "SELECT $cur AS cur, $prev AS prev FROM $table
+                 WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 60 DAY)"
+            )->fetch();
+            return ['cur' => (float)($row['cur'] ?? 0), 'prev' => (float)($row['prev'] ?? 0)];
+        };
+
+        // % change helper — returns 100 when the previous window was empty
+        // but the current one has activity, 0 when both are flat.
+        $pct = fn(float $cur, float $prev): int => $prev > 0
+            ? (int) round(($cur - $prev) / $prev * 100)
+            : ($cur > 0 ? 100 : 0);
+
+        $gmvPair  = $pair('bids', 'bid_amount');
+        $userPair = $pair('users');
+        $bidPair  = $pair('bids');
+        $carPair  = $pair('cars');
+
+        // Daily activity for the last 90 days (chart series).
+        $bidsByDay = $db->query(
+            "SELECT DATE(created_at) d, COUNT(*) c FROM bids
+             WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)
+             GROUP BY DATE(created_at)"
+        )->fetchAll(\PDO::FETCH_KEY_PAIR);
+        $carsByDay = $db->query(
+            "SELECT DATE(created_at) d, COUNT(*) c FROM cars
+             WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)
+             GROUP BY DATE(created_at)"
+        )->fetchAll(\PDO::FETCH_KEY_PAIR);
+
+        $chart = [];
+        for ($i = 89; $i >= 0; $i--) {
+            $d = date('Y-m-d', strtotime("-$i days"));
+            $chart[] = [
+                'd'        => $d,
+                'bids'     => (int) ($bidsByDay[$d] ?? 0),
+                'listings' => (int) ($carsByDay[$d] ?? 0),
+            ];
+        }
+
         $this->view('admin/index', [
             'pageTitle'       => 'Admin Dashboard',
             'pending'         => $pending,
-            'users'           => $users,
+            'users'           => array_slice($users, 0, 15),
+            'userCount'       => count($users),
             'logs'            => $logs,
+            'recentListings'  => $recentListings,
+            'chart'           => $chart,
             'analytics'       => [
                 'total_cars'      => $totalCars,
                 'total_users'     => $totalUsers,
                 'total_bids'      => $totalBids,
                 'active_auctions' => $activeAuctions,
                 'gmv'             => $grossGMV,
+                'gmv30'           => $gmvPair['cur'],
+                'users30'         => (int) $userPair['cur'],
+                'bids30'          => (int) $bidPair['cur'],
+                'listings30'      => (int) $carPair['cur'],
+                'gmv_pct'         => $pct($gmvPair['cur'], $gmvPair['prev']),
+                'users_pct'       => $pct($userPair['cur'], $userPair['prev']),
+                'bids_pct'        => $pct($bidPair['cur'], $bidPair['prev']),
+                'listings_pct'    => $pct($carPair['cur'], $carPair['prev']),
             ],
         ]);
     }

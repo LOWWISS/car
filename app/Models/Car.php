@@ -189,6 +189,23 @@ final class Car extends BaseModel
         return $stmt->fetchAll();
     }
 
+    /** Latest listings across all statuses, for the admin overview table. */
+    public function recentWithDetails(int $limit = 25): array
+    {
+        $stmt = $this->db->prepare(
+            "SELECT c.id, c.title, c.make, c.model, c.year, c.body_type, c.status,
+                    c.starting_price, c.auction_end, c.created_at,
+                    u.name AS seller_name,
+                    (SELECT MAX(bid_amount) FROM bids WHERE car_id = c.id) AS current_bid,
+                    (SELECT COUNT(*) FROM bids WHERE car_id = c.id) AS bid_count
+             FROM cars c INNER JOIN users u ON u.id = c.seller_id
+             ORDER BY c.created_at DESC LIMIT ?"
+        );
+        $stmt->bindValue(1, $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
     public function distinctMakes(): array
     {
         $stmt = $this->db->query("SELECT DISTINCT make FROM cars ORDER BY make ASC");

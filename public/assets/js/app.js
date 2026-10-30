@@ -111,6 +111,14 @@
   window.addEventListener('scroll', updateHeaderState, { passive: true });
   updateHeaderState();
 
+  // "/" focuses the sidebar search (Linear-style shortcut)
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+    var sb = document.getElementById('sidebarSearch');
+    if (sb) { e.preventDefault(); sb.focus(); }
+  });
+
   // ---- Countdown timers (poll DOM every second, picks up new elements) ----
   function fmt(ms) {
     if (ms <= 0) return 'Auction ended';

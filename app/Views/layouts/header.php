@@ -11,8 +11,16 @@ $appUrl = rtrim(Config::get('APP_URL', '/car'), '/');
 $assetBase = $appUrl . '/assets';
 $currentUser = Auth::user();
 $unread = 0;
+$sbActive = $sbBids = $sbWatch = 0;
 if ($currentUser) {
     try { $unread = (new Notification())->unreadCount((int) $currentUser['id']); } catch (\Throwable $e) { $unread = 0; }
+    try {
+        $uid = (int) $currentUser['id'];
+        $db = Database::getInstance();
+        $sbActive = (int) $db->query("SELECT COUNT(*) FROM cars WHERE status='active' AND auction_end > NOW()")->fetchColumn();
+        $sbBids   = (int) $db->query("SELECT COUNT(*) FROM bids WHERE bidder_id = $uid")->fetchColumn();
+        $sbWatch  = (int) $db->query("SELECT COUNT(*) FROM watchlist WHERE user_id = $uid")->fetchColumn();
+    } catch (\Throwable $e) { $sbActive = $sbBids = $sbWatch = 0; }
 }
 $pageTitle = $pageTitle ?? 'Car Auction System';
 
@@ -72,6 +80,26 @@ if ($pageSubtitle === '' && $currentUser) {
         $pageSubtitle = 'View listing details and place your bids';
     }
 }
+// Sidebar nav helpers (used by the logged-in aside below).
+$sbBadge = function (int $n, bool $accent = false): string {
+    if ($n <= 0) return '';
+    $cls = $accent ? 'bg-brand/10 text-brand' : 'bg-slate-100 text-slate-500';
+    return '<span class="sidebar-label ml-auto rounded-md px-1.5 py-0.5 text-[11px] font-semibold ' . $cls . '">' . $n . '</span>';
+};
+$sbLink = function (string $href, string $label, string $icon, string $right = '', string $stagger = '') use ($appUrl): string {
+    return '<a href="' . $appUrl . $href . '" class="sidebar-link group flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition animate-slide-in-left ' . $stagger . '">'
+        . '<svg class="w-[18px] h-[18px] shrink-0 text-slate-400 transition group-hover:text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="' . $icon . '"/></svg>'
+        . '<span class="sidebar-label truncate">' . e($label) . '</span>' . $right . '</a>';
+};
+$sbSection = function (string $label, string $plusHref = '', string $plusTitle = '') use ($appUrl): string {
+    $plus = '';
+    if ($plusHref !== '') {
+        $plus = '<a href="' . $appUrl . $plusHref . '" class="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition" title="' . e($plusTitle) . '" aria-label="' . e($plusTitle) . '">'
+            . '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg></a>';
+    }
+    return '<div class="sidebar-label flex items-center justify-between px-2.5 pb-1.5">'
+        . '<span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">' . e($label) . '</span>' . $plus . '</div>';
+};
 ?>
 <!DOCTYPE html>
 <html lang="en" class="h-full">
@@ -112,69 +140,86 @@ if ($pageSubtitle === '' && $currentUser) {
 <!-- ===== Sidebar (full height, left of header) ===== -->
 <div class="flex min-h-screen">
   <aside id="sidebar" class="fixed top-0 left-0 z-50 w-64 h-screen bg-white border-r border-slate-200 transform -translate-x-full lg:translate-x-0 transition-all duration-200 overflow-y-auto shrink-0 flex flex-col">
-    <div id="sidebarHeader" class="h-16 flex items-center gap-2 px-4 border-b border-slate-200 font-bold text-lg text-brand-dark shrink-0">
-      <span id="sidebarLogo" class="flex items-center gap-2 overflow-hidden">
-        <svg class="w-7 h-7 text-brand shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3 13l2-5h14l2 5M5 13h14v5H5z M7 18v2 M17 18v2"/>
-        </svg>
-        <span id="sidebarLogoText">CarAuction</span>
-      </span>
-      <button type="button" data-toggle="collapse-sidebar" class="ml-auto p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-brand transition shrink-0" aria-label="Collapse sidebar" title="Collapse sidebar">
-        <svg id="collapseIcon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <!-- Workspace header -->
+    <div id="sidebarHeader" class="h-14 flex items-center gap-2 px-3.5 border-b border-slate-100 shrink-0">
+      <a id="sidebarLogo" href="<?= $appUrl ?><?= Auth::is('admin') ? '/admin' : '/dashboard' ?>" class="flex items-center gap-2.5 min-w-0 group" aria-label="CarAuction home">
+        <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand to-blue-500 flex items-center justify-center shadow-sm shadow-brand/25 shrink-0 transition group-hover:shadow-md group-hover:shadow-brand/40 group-hover:scale-105">
+          <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13l2-5h14l2 5M5 13h14v5H5z M7 18v2 M17 18v2"/>
+          </svg>
+        </span>
+        <span id="sidebarLogoText" class="font-semibold text-[15px] tracking-tight text-slate-900 truncate">CarAuction</span>
+      </a>
+      <button type="button" data-toggle="collapse-sidebar" class="ml-auto p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition shrink-0" aria-label="Collapse sidebar" title="Collapse sidebar">
+        <svg id="collapseIcon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
         </svg>
       </button>
     </div>
-    <nav class="p-4 space-y-1">
-      <a href="<?= $appUrl ?><?= Auth::is('admin') ? '/admin' : '/dashboard' ?>" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-brand hover:bg-slate-100 transition animate-slide-in-left stagger-1">
-        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-        <span class="sidebar-label">Home</span>
-      </a>
+
+    <!-- Search -->
+    <div class="px-3 pt-3 sidebar-label">
+      <form action="<?= $appUrl ?>/cars" method="get" role="search">
+        <div class="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-[7px] focus-within:border-brand/60 focus-within:bg-white focus-within:ring-2 focus-within:ring-brand/10 transition">
+          <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/>
+          </svg>
+          <input id="sidebarSearch" name="q" type="text" placeholder="Search cars" autocomplete="off"
+                 class="w-full bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none">
+          <kbd class="hidden sm:inline shrink-0 rounded border border-slate-200 bg-white px-1.5 py-px text-[10px] font-semibold text-slate-400">/</kbd>
+        </div>
+      </form>
+    </div>
+
+    <nav class="p-3 space-y-6">
+      <!-- Primary -->
+      <div class="space-y-0.5">
+        <?= $sbLink(Auth::is('admin') ? '/admin' : '/dashboard', 'Home', 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', '', 'stagger-1') ?>
+        <?= $sbLink('/notifications', 'Notifications', 'M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1', $sbBadge($unread, true), 'stagger-2') ?>
+        <?php if (!Auth::is('admin')): ?>
+          <?= $sbLink('/dashboard/my-bids', 'My Bids', 'M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 007.5 7.5h4.5a7.5 7.5 0 007.5-7.5v-4a1.5 1.5 0 00-3 0m-6-1.5v-7a1.5 1.5 0 013 0v7m0 0v-3a1.5 1.5 0 013 0v3', $sbBadge($sbBids), 'stagger-3') ?>
+        <?php endif; ?>
+      </div>
+
+      <!-- Marketplace -->
+      <div>
+        <?= $sbSection('Marketplace', Auth::inRoles(['seller', 'admin']) ? '/cars/create' : '', 'New listing') ?>
+        <div class="space-y-0.5">
+          <?= $sbLink('/cars', 'Browse Cars', 'M4 6h16M4 10h16M4 14h16M4 18h16', '', 'stagger-4') ?>
+          <?= $sbLink('/cars/bidding', 'Live Bidding', 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', $sbBadge($sbActive), 'stagger-5') ?>
+          <?= $sbLink('/cars/featured', 'Featured', 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l-3.976-2.888a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z', '', 'stagger-6') ?>
+        </div>
+      </div>
+
       <?php if (!Auth::is('admin')): ?>
-      <!-- Customer-only links -->
-      <a href="<?= $appUrl ?>/cars" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-brand hover:bg-slate-100 transition animate-slide-in-left stagger-2">
-        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-        <span class="sidebar-label">Browse</span>
-      </a>
-      <a href="<?= $appUrl ?>/cars/bidding" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-brand hover:bg-slate-100 transition animate-slide-in-left stagger-3">
-        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        <span class="sidebar-label">Bidding</span>
-      </a>
-      <a href="<?= $appUrl ?>/cars/featured" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-brand hover:bg-slate-100 transition animate-slide-in-left stagger-4">
-        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-        <span class="sidebar-label">Featured Cars</span>
-      </a>
-      <a href="<?= $appUrl ?>/dashboard/my-bids" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-brand hover:bg-slate-100 transition animate-slide-in-left stagger-5">
-        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        <span class="sidebar-label">My Bids</span>
-      </a>
-      <a href="<?= $appUrl ?>/dashboard/won-auctions" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-brand hover:bg-slate-100 transition animate-slide-in-left stagger-6">
-        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
-        <span class="sidebar-label">Won Auctions</span>
-      </a>
-      <a href="<?= $appUrl ?>/transactions" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-brand hover:bg-slate-100 transition animate-slide-in-left stagger-7">
-        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-        <span class="sidebar-label">Transactions</span>
-      </a>
+      <!-- My account -->
+      <div>
+        <?= $sbSection('My Account') ?>
+        <div class="space-y-0.5">
+          <?= $sbLink('/dashboard/won-auctions', 'Won Auctions', 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z', '', 'stagger-7') ?>
+          <?= $sbLink('/dashboard/watchlist', 'Watchlist', 'M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z', $sbBadge($sbWatch), 'stagger-8') ?>
+          <?= $sbLink('/transactions', 'Transactions', 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z', '', 'stagger-9') ?>
+        </div>
+      </div>
       <?php endif; ?>
 
       <?php if (Auth::is('admin')): ?>
-      <!-- Admin-only links -->
-      <a href="<?= $appUrl ?>/admin/users" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-brand hover:bg-slate-100 transition animate-slide-in-left stagger-8">
-        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 11-8 0 4 4 0 018 0zm6 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-        <span class="sidebar-label">Manage Users</span>
-      </a>
-      <a href="<?= $appUrl ?>/admin/logs" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:text-brand hover:bg-slate-100 transition animate-slide-in-left stagger-9">
-        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        <span class="sidebar-label">Audit Logs</span>
-      </a>
+      <!-- Admin -->
+      <div>
+        <?= $sbSection('Admin') ?>
+        <div class="space-y-0.5">
+          <?= $sbLink('/admin', 'Dashboard', 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', '', 'stagger-7') ?>
+          <?= $sbLink('/admin/users', 'Users', 'M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 11-8 0 4 4 0 018 0zm6-3a4 4 0 11-8 0 4 4 0 018 0z', '', 'stagger-8') ?>
+          <?= $sbLink('/admin/logs', 'Audit Logs', 'M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', '', 'stagger-9') ?>
+        </div>
+      </div>
       <?php endif; ?>
     </nav>
 
-    <!-- Sidebar footer with user info (matches main footer height) -->
+    <!-- Sidebar footer with user info -->
     <div class="mt-auto shrink-0">
-      <div id="sidebarFooter" class="border-t border-slate-200 bg-white p-4 flex items-center gap-3" style="height: 130px;">
-        <span class="w-9 h-9 rounded-full bg-brand text-white flex items-center justify-center text-sm font-semibold shrink-0">
+      <div id="sidebarFooter" class="border-t border-slate-100 bg-white p-3.5 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-lg bg-gradient-to-br from-brand to-blue-500 text-white flex items-center justify-center text-sm font-semibold shrink-0 shadow-sm shadow-brand/25">
           <?= e(strtoupper(substr($currentUser['name'], 0, 1))) ?>
         </span>
         <div class="sidebar-label min-w-0">
