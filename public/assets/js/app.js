@@ -102,14 +102,10 @@
   // Restore collapsed state on load
   applySidebarState();
 
-  // ---- Landing page header: dark glass over hero -> white glass on scroll ----
-  // The header is outside <main>, so PJAX swaps leave it in place. Keying off
-  // the #landingHero element keeps the state correct after PJAX navigation.
+  // ---- Site header: subtle shadow once the page is scrolled ----
   var siteHeader = document.getElementById('siteHeader');
   function updateHeaderState() {
     if (!siteHeader) return;
-    var overHero = !!document.getElementById('landingHero') && window.scrollY < 40;
-    siteHeader.classList.toggle('header-dark', overHero);
     siteHeader.classList.toggle('is-scrolled', window.scrollY > 8);
   }
   window.addEventListener('scroll', updateHeaderState, { passive: true });

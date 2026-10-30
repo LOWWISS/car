@@ -16,8 +16,7 @@ if ($currentUser) {
 }
 $pageTitle = $pageTitle ?? 'Car Auction System';
 
-// Current path — used for guest navbar active-link highlighting and to
-// detect the landing page (dark-glass header over the hero).
+// Current path — used for guest navbar active-link highlighting.
 try { $currentPath = (new Request())->path(); } catch (\Throwable $e) { $currentPath = '/'; }
 $guestLinks = [
     '/'              => 'Home',
@@ -105,7 +104,7 @@ if ($pageSubtitle === '' && $currentUser) {
     </script>
 
     <!-- App CSS (reusable component classes via @apply) -->
-    <link rel="stylesheet" href="<?= e($assetBase) ?>/css/app.css?v=6">
+    <link rel="stylesheet" href="<?= e($assetBase) ?>/css/app.css?v=7">
 </head>
 <body class="h-full bg-slate-50 text-slate-800 font-sans antialiased min-h-screen">
 
@@ -195,7 +194,7 @@ if ($pageSubtitle === '' && $currentUser) {
 <?php endif; ?>
 
 <!-- ===== Navbar ===== -->
-<header id="siteHeader" class="fixed top-0 left-0 right-0 <?= Auth::check() ? 'lg:left-64' : '' ?> z-40 bg-white/90 backdrop-blur border-b border-slate-200<?= $currentPath === '/' ? ' header-dark' : '' ?>">
+<header id="siteHeader" class="fixed top-0 left-0 right-0 <?= Auth::check() ? 'lg:left-64' : '' ?> z-40 bg-white/90 backdrop-blur border-b border-slate-200">
   <nav class="px-4 sm:px-6 lg:px-8 h-16 flex items-center gap-4">
     <?php if (Auth::check()): ?>
       <!-- Mobile sidebar toggle (logged-in only) -->

@@ -537,10 +537,8 @@ main {
   transform: none;
 }
 
-/* ===== Site header: modern landing-page look =====
-   On the landing page (#landingHero present) the header starts as dark
-   glass that blends into the hero, then fades to white glass on scroll.
-   JS toggles .header-dark / .is-scrolled on #siteHeader. */
+/* ===== Site header =====
+   White glass header; JS adds .is-scrolled for a drop shadow on scroll. */
 #siteHeader {
   transition: background-color .35s ease, border-color .35s ease, box-shadow .35s ease;
 }
@@ -564,32 +562,6 @@ main {
   background: var(--brand);
 }
 .hdr-login:hover { color: var(--brand); }
-
-/* Dark-glass state — top of the landing page, over the hero */
-#siteHeader.header-dark {
-  background: linear-gradient(to bottom, rgba(2, 6, 23, .95), rgba(15, 23, 42, .9));
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom-color: rgba(148, 163, 184, .18);
-}
-#siteHeader.header-dark .hdr-logo { color: #fff; }
-#siteHeader.header-dark .hdr-logo-accent { color: #93c5fd; }
-#siteHeader.header-dark .hdr-title { color: #f1f5f9; }
-#siteHeader.header-dark .hdr-sub { color: #94a3b8; }
-
-#siteHeader.header-dark .hdr-icon-btn { color: #cbd5e1; }
-#siteHeader.header-dark .hdr-icon-btn:hover { background: rgba(255, 255, 255, .1); color: #fff; }
-
-#siteHeader.header-dark nav .nav-link { color: #cbd5e1; }
-#siteHeader.header-dark nav .nav-link:hover { color: #fff; background: rgba(255, 255, 255, .1); }
-#siteHeader.header-dark nav .nav-link.active { color: #fff; }
-#siteHeader.header-dark nav .nav-link.active::after { background: #60a5fa; }
-
-#siteHeader.header-dark .hdr-login { color: #e2e8f0; }
-#siteHeader.header-dark .hdr-login:hover { color: #fff; }
-
-#siteHeader.header-dark .hdr-logout { color: #fca5a5; border-color: rgba(252, 165, 165, .35); }
-#siteHeader.header-dark .hdr-logout:hover { background: rgba(239, 68, 68, .15); }
 
 /* ===== Sidebar collapsed state (desktop only) =====
    Toggled by adding body.sidebar-collapsed via JS.

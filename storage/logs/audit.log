@@ -311,3 +311,4 @@
 [2026-10-18 13:26:09] user=2 ip=::1 action=listing_update details={"car":19}
 [2026-10-18 13:26:10] user=2 ip=::1 action=logout details={"user":"jane@car.local"}
 [2026-10-18 13:26:28] user=2 ip=::1 action=login details={"user":"jane@car.local"}
+[2026-10-30 21:23:01] user=1 ip=::1 action=login details={"user":"admin@car.local"}
