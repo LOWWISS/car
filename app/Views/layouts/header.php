@@ -27,10 +27,10 @@ $pageTitle = $pageTitle ?? 'Car Auction System';
 // Current path — used for guest navbar active-link highlighting.
 try { $currentPath = (new Request())->path(); } catch (\Throwable $e) { $currentPath = '/'; }
 $guestLinks = [
-    '/'              => 'Home',
-    '/cars'          => 'Browse',
-    '/cars/bidding'  => 'Bidding',
-    '/cars/featured' => 'Featured Cars',
+    '/'               => 'Home',
+    '/#live-auctions' => 'Browse',
+    '/#showroom'      => 'Bidding',
+    '/#ending-soon'   => 'Featured Cars',
 ];
 $activeLink = '';
 $bestMatch = -1;

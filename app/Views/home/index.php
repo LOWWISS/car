@@ -241,7 +241,7 @@ $featuredCars = array_slice($featured ?? [], 0, 4);
 </section>
 
 <!-- Live Bidding Section -->
-<section class="bg-slate-50 py-20 md:py-24">
+<section id="live-auctions" class="bg-slate-50 py-20 md:py-24 scroll-mt-24">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex flex-wrap items-end justify-between gap-4 mb-10" data-reveal>
       <div>
@@ -250,7 +250,7 @@ $featuredCars = array_slice($featured ?? [], 0, 4);
             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
             <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
           </span>
-          <h2 class="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">Ending soon</h2>
+          <h2 id="ending-soon" class="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">Ending soon</h2>
         </div>
         <p class="mt-2 text-slate-600">Active auctions closing shortly — place your bid before time runs out.</p>
       </div>
@@ -277,7 +277,7 @@ $featuredCars = array_slice($featured ?? [], 0, 4);
 
 <!-- Featured showroom -->
 <?php if (!empty($featuredCars)): ?>
-<section class="relative bg-slate-950 py-20 md:py-24 overflow-hidden">
+<section id="showroom" class="relative bg-slate-950 py-20 md:py-24 overflow-hidden scroll-mt-24">
   <div aria-hidden="true" class="pointer-events-none absolute inset-0">
     <div class="absolute inset-0 bg-[radial-gradient(ellipse_50%_45%_at_50%_0%,rgba(59,130,246,0.14),transparent)]"></div>
   </div>
