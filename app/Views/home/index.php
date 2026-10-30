@@ -739,6 +739,7 @@ if (container) {
         model.position.x -= c.x;
         model.position.z -= c.z;
         model.position.y -= box.min.y;
+        model.rotation.y = Math.PI; // face the front toward the camera
         scene.add(model);
         if (loading) loading.style.display = 'none';
       },
