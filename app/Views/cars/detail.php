@@ -95,7 +95,7 @@ $primarySrc = $primary ? $base . '/' . $primary['image_path'] : $base . '/assets
               <div class="font-bold text-slate-900 text-lg">&#8369;<?= number_format((float)$car['buy_now_price'], 2) ?></div>
             </div>
             <?php if ($canBid): ?>
-              <form method="post" action="<?= $base ?>/bids/buy-now/<?= (int)$car['id'] ?>" onsubmit="return confirm('Buy this car now for &#8369;<?= number_format((float)$car['buy_now_price'],2) ?>?');">
+              <form method="post" action="<?= $base ?>/bids/buy-now/<?= (int)$car['id'] ?>" data-confirm="Buy this car now for &#8369;<?= number_format((float)$car['buy_now_price'],2) ?>?" data-confirm-text="Buy Now">
                 <input type="hidden" name="_csrf_token" value="<?= e($csrf) ?>">
                 <button type="submit" class="btn-success text-sm">Buy Now</button>
               </form>
@@ -135,7 +135,7 @@ $primarySrc = $primary ? $base . '/' . $primary['image_path'] : $base . '/assets
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
               Edit
             </a>
-            <form method="post" action="<?= $base ?>/cars/delete/<?= (int)$car['id'] ?>" onsubmit="return confirm('Delete this listing? This cannot be undone.');">
+            <form method="post" action="<?= $base ?>/cars/delete/<?= (int)$car['id'] ?>" data-confirm="Delete this listing? This cannot be undone." data-confirm-text="Delete">
               <input type="hidden" name="_csrf_token" value="<?= e($csrf) ?>">
               <button type="submit" class="btn-danger text-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>

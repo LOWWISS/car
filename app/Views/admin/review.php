@@ -106,7 +106,7 @@ $primarySrc = $primary ? $base . '/' . $primary['image_path'] : $base . '/assets
           <h3 class="font-semibold text-slate-800 mb-3">Decision</h3>
           <div class="space-y-3">
             <form method="post" action="<?= $base ?>/admin/approve/<?= (int)$car['id'] ?>"
-                  onsubmit="return confirm('Approve this listing and make it live in the catalog?');">
+                  data-confirm="Approve this listing and make it live in the catalog?" data-confirm-text="Approve">
               <input type="hidden" name="_csrf_token" value="<?= e($csrf) ?>">
               <button type="submit" class="btn-success w-full flex items-center justify-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
@@ -114,7 +114,7 @@ $primarySrc = $primary ? $base . '/' . $primary['image_path'] : $base . '/assets
               </button>
             </form>
             <form method="post" action="<?= $base ?>/admin/reject/<?= (int)$car['id'] ?>"
-                  onsubmit="return confirm('Reject this listing? The seller will be notified to review and resubmit.');">
+                  data-confirm="Reject this listing? The seller will be notified to review and resubmit." data-confirm-text="Reject">
               <input type="hidden" name="_csrf_token" value="<?= e($csrf) ?>">
               <button type="submit" class="btn-danger w-full flex items-center justify-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>

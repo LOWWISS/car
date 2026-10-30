@@ -101,6 +101,7 @@ $router->add('GET',  '/watchlist',              'WatchlistController@list');
 // Notifications
 $router->add('GET',  '/notifications',          'NotificationController@index');
 $router->add('POST', '/notifications/mark-read','NotificationController@markRead');
+$router->add('POST', '/notifications/read/{id}','NotificationController@read');
 $router->add('GET',  '/notifications/unread-count','NotificationController@unreadCount');
 
 // Dashboard

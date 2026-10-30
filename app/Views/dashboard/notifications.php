@@ -42,7 +42,7 @@ $timeAgo = function (string $ts): string {
       <div class="flex items-center gap-3">
         <h1 class="text-xl font-semibold text-white">Notifications</h1>
         <?php if ($unreadCount > 0): ?>
-          <span class="inline-flex items-center rounded-md bg-brand/25 px-1.5 py-0.5 text-[11px] font-semibold text-indigo-300"><?= $unreadCount ?> unread</span>
+          <span id="notifUnreadPill" class="inline-flex items-center rounded-md bg-brand/25 px-1.5 py-0.5 text-[11px] font-semibold text-indigo-300"><?= $unreadCount ?> unread</span>
         <?php endif; ?>
       </div>
       <?php if ($unreadCount > 0): ?>
@@ -87,16 +87,32 @@ $timeAgo = function (string $ts): string {
               </p>
             </div>
 
-            <!-- Right: unread dot + link -->
+            <!-- Right: unread dot + actions -->
             <div class="flex items-center gap-3 shrink-0 self-center">
               <?php if ($unread): ?>
                 <span class="notif-dot w-2 h-2 rounded-full bg-auction shrink-0" title="Unread"></span>
+                <button type="button" class="notif-view inline-flex items-center gap-1 text-xs font-medium text-zinc-400 hover:text-white transition"
+                        data-id="<?= (int)$n['id'] ?>" data-csrf="<?= e(Csrf::token()) ?>">
+                  Mark read
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                </button>
               <?php endif; ?>
-              <?php if (!empty($n['link'])): ?>
-                <a href="<?= $base ?><?= e($n['link']) ?>" class="group inline-flex items-center gap-1 text-xs font-medium text-zinc-400 hover:text-white transition">
+              <?php
+                $href  = trim((string)($n['link'] ?? ''));
+                // Generic fallbacks mean the target no longer exists — alert instead of navigating.
+                $dead  = $href === '' || in_array($href, ['/admin', '/dashboard'], true);
+              ?>
+              <?php if (!$dead): ?>
+                <a href="<?= $base ?><?= e($href) ?>" class="notif-goto group inline-flex items-center gap-1 text-xs font-medium text-zinc-400 hover:text-white transition"
+                   data-id="<?= (int)$n['id'] ?>" data-csrf="<?= e(Csrf::token()) ?>" <?= $unread ? 'data-unread="1"' : '' ?>>
                   View
                   <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                 </a>
+              <?php else: ?>
+                <button type="button" class="notif-dead inline-flex items-center gap-1 text-xs font-medium text-zinc-400 hover:text-white transition">
+                  View
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </button>
               <?php endif; ?>
             </div>
           </li>

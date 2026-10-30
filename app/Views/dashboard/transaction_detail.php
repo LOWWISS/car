@@ -139,7 +139,7 @@ $imgSrc = $img ? $base . '/' . $img : $base . '/assets/images/placeholder.svg';
 
         <?php if ($canAdvance && $t['status'] === 'ready_for_handover'): ?>
           <form method="post" action="<?= $base ?>/transactions/complete/<?= (int)$t['id'] ?>"
-                onsubmit="return confirm('Record vehicle handover and complete this transaction?');">
+                data-confirm="Record vehicle handover and complete this transaction?" data-confirm-text="Complete">
             <input type="hidden" name="_csrf_token" value="<?= e($csrf) ?>">
             <button type="submit" class="btn-success w-full text-sm">Record Handover &amp; Complete</button>
           </form>
@@ -153,7 +153,7 @@ $imgSrc = $img ? $base . '/' . $img : $base . '/assets/images/placeholder.svg';
 
         <?php if ($isAdmin && !$isCancelled && $t['status'] !== 'completed'): ?>
           <form method="post" action="<?= $base ?>/transactions/cancel/<?= (int)$t['id'] ?>"
-                onsubmit="return confirm('Cancel this transaction? The listing will revert to closed.');">
+                data-confirm="Cancel this transaction? The listing will revert to closed." data-confirm-text="Cancel">
             <input type="hidden" name="_csrf_token" value="<?= e($csrf) ?>">
             <button type="submit" class="btn-danger w-full text-sm">Cancel Transaction</button>
           </form>

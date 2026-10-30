@@ -22,6 +22,18 @@ final class NotificationController extends BaseController
         Response::json(['success' => true]);
     }
 
+    /** POST /notifications/read/{id} — mark a single notification read (AJAX). */
+    public function read(string $id): void
+    {
+        Middleware::requireAuth();
+        if (!$this->request->isPost() || !Csrf::verify()) {
+            Response::json(['success' => false, 'message' => 'Invalid request.'], 419);
+        }
+        $model = new Notification();
+        $model->markRead((int) $id, Auth::id());
+        Response::json(['success' => true, 'unread' => $model->unreadCount(Auth::id())]);
+    }
+
     /** GET /notifications/unread-count — for the navbar bell badge (AJAX). */
     public function unreadCount(): void
     {

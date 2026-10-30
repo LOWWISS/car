@@ -402,6 +402,80 @@
     });
   }
 
+  // Single-notification "Mark read" — stays on the page, dims the row.
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.notif-view');
+    if (!btn) return;
+    e.preventDefault();
+    fetch(APP_BASE + '/notifications/read/' + btn.getAttribute('data-id'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: '_csrf_token=' + encodeURIComponent(btn.getAttribute('data-csrf'))
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data.success) { toast(data.message || 'Could not mark read', 'error'); return; }
+        var row = btn.closest('.notif-row');
+        if (row) {
+          row.classList.remove('bg-white/[0.03]');
+          row.classList.add('opacity-60');
+          var p = row.querySelector('p');
+          if (p) { p.classList.remove('text-zinc-100', 'font-medium'); p.classList.add('text-zinc-400'); }
+          var dot = row.querySelector('.notif-dot');
+          if (dot) dot.remove();
+        }
+        btn.remove();
+        var pill = document.getElementById('notifUnreadPill');
+        if (pill) {
+          var left = data.unread != null ? data.unread : 0;
+          if (left > 0) { pill.textContent = left + ' unread'; }
+          else {
+            pill.remove();
+            var all = document.getElementById('markAllRead');
+            if (all) all.remove();
+          }
+        }
+        updateNotifBadge(data.unread != null ? data.unread : 0);
+      })
+      .catch(function () { toast('Network error', 'error'); });
+  });
+
+  // Forms with data-confirm="msg" -> centered appConfirm modal before submit.
+  document.addEventListener('submit', function (e) {
+    var form = e.target.closest('form[data-confirm]');
+    if (!form || form._confirmed) return;
+    e.preventDefault();
+    appConfirm(form.getAttribute('data-confirm'), {
+      confirmText: form.getAttribute('data-confirm-text') || 'Confirm'
+    }).then(function (ok) {
+      if (!ok) return;
+      form._confirmed = true;
+      form.submit();
+    });
+  });
+
+  // "View" on a dead notification link: stay put, show the alert modal.
+  document.addEventListener('click', function (e) {
+    var dead = e.target.closest('.notif-dead');
+    if (!dead) return;
+    e.preventDefault();
+    appAlert('This item is no longer available.', 'info');
+  });
+
+  // "View" on an unread notification: silently mark it read, then navigate.
+  document.addEventListener('click', function (e) {
+    var link = e.target.closest('a.notif-goto');
+    if (!link || !link.getAttribute('data-unread')) return;
+    e.preventDefault();
+    var go = function () { window.location.href = link.href; };
+    fetch(APP_BASE + '/notifications/read/' + link.getAttribute('data-id'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: '_csrf_token=' + encodeURIComponent(link.getAttribute('data-csrf'))
+    }).then(go).catch(go);
+    setTimeout(go, 800); // never trap the user if the request hangs
+  });
+
   function bindBidForm() {
     var bidForm = document.getElementById('bidForm');
     if (!bidForm || bidForm._bound) return;

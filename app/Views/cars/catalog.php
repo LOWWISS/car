@@ -1,40 +1,57 @@
 <?php
-/** Car catalog with filters + pagination. */
+/** Car catalog — dark filter bar + chips + grid, consistent with the dashboard chrome. */
 $base = rtrim(Config::get('APP_URL','/car'),'/');
 $f = $filters;
 $bodyTypes = ['Sedan','SUV','Pickup','Hatchback','Coupe','Convertible','Van','Wagon'];
-?>
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+$sorts = ['newest'=>'Newest','oldest'=>'Oldest','price_low'=>'Price ↑','price_high'=>'Price ↓','ending'=>'Ending soon','year_desc'=>'Year ↓'];
+$inputCls = 'w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:ring-2 focus:ring-brand/60 focus:border-brand/60 outline-none transition';
+$labelCls = 'block text-[11px] font-semibold uppercase tracking-wider text-zinc-500 mb-1.5';
 
-  <!-- Search bar -->
-  <form method="get" action="<?= $base ?>/cars" class="mb-6 animate-fade-in-up">
-    <div class="flex gap-2">
-      <div class="relative flex-1">
-        <svg class="w-5 h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-        <input type="text" name="q" value="<?= e($f['q']) ?>" placeholder="Search by title, make, or model..."
-               class="w-full rounded-lg border border-slate-300 pl-10 pr-4 py-3 text-sm focus:ring-2 focus:ring-brand focus:border-brand outline-none transition">
+// Active-filter chips (each links back with that param removed)
+$chipLabels = ['q'=>'Search','make'=>'Make','body_type'=>'Body','min_price'=>'Min ₱','max_price'=>'Max ₱','location'=>'Location','sort'=>'Sort'];
+$chips = [];
+foreach ($chipLabels as $key => $label) {
+    if (!empty($f[$key])) {
+        $rest = $f; unset($rest[$key]);
+        $chips[] = [$label . ': ' . $f[$key], '/cars?' . http_build_query(array_filter($rest, fn($v)=> $v !== '' && $v !== null))];
+    }
+}
+?>
+<div class="bg-[#0f0f12] min-h-[calc(100vh-4rem)] text-zinc-300">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Header -->
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-5 animate-fade-in">
+      <div>
+        <h1 class="text-xl font-semibold text-white">Browse Cars</h1>
+        <p class="text-sm text-zinc-500 mt-0.5"><?= (int)$total ?> listing<?= $total===1?'':'s' ?> found</p>
       </div>
-      <button type="submit" class="btn-primary px-6" aria-label="Search">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-        Search
-      </button>
-      <?php if (!empty($f['q'])): ?>
-        <a href="<?= $base ?>/cars" class="btn-outline">Clear</a>
+      <?php if ($chips): ?>
+        <div class="flex flex-wrap items-center gap-2">
+          <?php foreach ($chips as [$text, $href]): ?>
+            <a href="<?= $base ?><?= e($href) ?>" class="group inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300 hover:border-red-400/40 hover:text-red-300 transition">
+              <?= e($text) ?>
+              <svg class="w-3 h-3 opacity-60 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </a>
+          <?php endforeach; ?>
+          <a href="<?= $base ?>/cars" class="text-xs text-zinc-500 hover:text-white transition underline underline-offset-2">Clear all</a>
+        </div>
       <?php endif; ?>
     </div>
-  </form>
 
-  <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-    <!-- Filters -->
-    <aside class="lg:col-span-1">
-      <form method="get" action="<?= $base ?>/cars" class="card p-4 space-y-4 sticky top-20 animate-fade-in-up stagger-1">
-        <div class="flex items-center gap-2 pb-2 border-b border-slate-100">
-          <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
-          <h3 class="font-semibold text-sm text-slate-700">Filters</h3>
+    <!-- Filter bar -->
+    <form method="get" action="<?= $base ?>/cars" class="rounded-xl border border-white/[0.07] bg-white/[0.02] p-4 mb-6 animate-fade-in-up">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div class="col-span-2 sm:col-span-1 lg:col-span-1">
+          <label class="<?= $labelCls ?>">Search</label>
+          <div class="relative">
+            <svg class="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input type="text" name="q" value="<?= e($f['q']) ?>" placeholder="Title, make, model..." class="<?= $inputCls ?> pl-9">
+          </div>
         </div>
         <div>
-          <label class="form-label">Make</label>
-          <select name="make" class="form-input">
+          <label class="<?= $labelCls ?>">Make</label>
+          <select name="make" class="<?= $inputCls ?>">
             <option value="">Any</option>
             <?php foreach ($makes as $m): ?>
               <option value="<?= e($m) ?>" <?= $f['make']===$m?'selected':'' ?>><?= e($m) ?></option>
@@ -42,87 +59,77 @@ $bodyTypes = ['Sedan','SUV','Pickup','Hatchback','Coupe','Convertible','Van','Wa
           </select>
         </div>
         <div>
-          <label class="form-label">Body type</label>
-          <select name="body_type" class="form-input">
+          <label class="<?= $labelCls ?>">Body type</label>
+          <select name="body_type" class="<?= $inputCls ?>">
             <option value="">Any</option>
             <?php foreach ($bodyTypes as $b): ?>
               <option value="<?= e($b) ?>" <?= $f['body_type']===$b?'selected':'' ?>><?= e($b) ?></option>
             <?php endforeach; ?>
           </select>
         </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="form-label">Min price</label>
-            <input type="number" name="min_price" value="<?= e($f['min_price']) ?>" class="form-input" min="0" placeholder="0">
-          </div>
-          <div>
-            <label class="form-label">Max price</label>
-            <input type="number" name="max_price" value="<?= e($f['max_price']) ?>" class="form-input" min="0" placeholder="Any">
+        <div>
+          <label class="<?= $labelCls ?>">Price range</label>
+          <div class="flex items-center gap-1.5">
+            <input type="number" name="min_price" value="<?= e($f['min_price']) ?>" class="<?= $inputCls ?> min-w-0" min="0" placeholder="Min">
+            <span class="text-zinc-600">–</span>
+            <input type="number" name="max_price" value="<?= e($f['max_price']) ?>" class="<?= $inputCls ?> min-w-0" placeholder="Max">
           </div>
         </div>
         <div>
-          <label class="form-label">Location</label>
-          <input type="text" name="location" value="<?= e($f['location']) ?>" class="form-input" placeholder="City or region">
+          <label class="<?= $labelCls ?>">Location</label>
+          <input type="text" name="location" value="<?= e($f['location']) ?>" class="<?= $inputCls ?>" placeholder="City or region">
         </div>
         <div>
-          <label class="form-label">Sort by</label>
-          <select name="sort" class="form-input">
-            <?php
-              $sorts = ['newest'=>'Newest','oldest'=>'Oldest','price_low'=>'Price: Low to High','price_high'=>'Price: High to Low','ending'=>'Ending Soon','year_desc'=>'Year: Newest'];
-              foreach ($sorts as $k=>$label): ?>
+          <label class="<?= $labelCls ?>">Sort by</label>
+          <select name="sort" class="<?= $inputCls ?>">
+            <?php foreach ($sorts as $k=>$label): ?>
               <option value="<?= e($k) ?>" <?= $f['sort']===$k?'selected':'' ?>><?= e($label) ?></option>
             <?php endforeach; ?>
           </select>
         </div>
-        <div class="flex gap-2 pt-2">
-          <button type="submit" class="btn-primary flex-1">Apply</button>
-          <a href="<?= $base ?>/cars" class="btn-outline">Reset</a>
-        </div>
-      </form>
-    </aside>
+      </div>
+      <div class="flex items-center gap-2 mt-4 pt-3 border-t border-white/[0.07]">
+        <button type="submit" class="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark transition">Apply filters</button>
+        <a href="<?= $base ?>/cars" class="rounded-lg border border-white/10 px-4 py-2 text-sm text-zinc-300 hover:bg-white/10 transition">Reset</a>
+      </div>
+    </form>
 
     <!-- Results -->
-    <section class="lg:col-span-3">
-      <p class="text-sm text-slate-500 mb-4 animate-fade-in"><?= (int)$total ?> listing<?= $total===1?'':'s' ?> found</p>
-
-      <?php if (empty($cars)): ?>
-        <div class="card animate-fade-in-up">
-          <div class="empty-state">
-            <div class="empty-state-icon">
-              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-            </div>
-            <h3 class="empty-state-title">No cars match your filters</h3>
-            <p class="empty-state-text">Try adjusting your search or clearing filters.</p>
-            <a href="<?= $base ?>/cars" class="btn-primary">Clear all filters</a>
-          </div>
+    <?php if (empty($cars)): ?>
+      <div class="rounded-xl border border-white/[0.07] py-16 px-6 text-center animate-fade-in-up">
+        <div class="w-14 h-14 mx-auto mb-4 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-500">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
         </div>
-      <?php else: ?>
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-          <?php foreach ($cars as $i => $car): ?>
-            <?php $stagger = 'stagger-' . (min($i, 7) + 1); include __DIR__ . '/../partials/car_card.php'; ?>
-          <?php endforeach; ?>
-        </div>
+        <h3 class="text-base font-semibold text-zinc-200">No cars match your filters</h3>
+        <p class="mt-1 text-sm text-zinc-500">Try adjusting your search or clearing filters.</p>
+        <a href="<?= $base ?>/cars" class="inline-block mt-4 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark transition">Clear all filters</a>
+      </div>
+    <?php else: ?>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <?php foreach ($cars as $i => $car): ?>
+          <?php $stagger = 'stagger-' . (min($i, 7) + 1); $cardDark = true; include __DIR__ . '/../partials/car_card.php'; ?>
+        <?php endforeach; ?>
+      </div>
 
-        <!-- Pagination -->
-        <?php if ($totalPages > 1): ?>
-          <nav class="flex justify-center mt-8 gap-1 animate-fade-in">
-            <?php
-              $query = $f; unset($query['q']);
-              $build = function($p) use ($f) {
-                $q = array_filter($f, fn($v)=> $v !== '' && $v !== null);
-                $q['page'] = $p;
-                return http_build_query($q);
-              };
-            ?>
-            <?php for ($p=1; $p<=$totalPages; $p++): ?>
-              <a href="<?= $base ?>/cars?<?= e($build($p)) ?>"
-                 class="pagination-link <?= $p===$page?'active':'' ?>">
-                 <?= (int)$p ?>
-              </a>
-            <?php endfor; ?>
-          </nav>
-        <?php endif; ?>
+      <!-- Pagination -->
+      <?php if ($totalPages > 1): ?>
+        <nav class="flex justify-center mt-8 gap-1.5 animate-fade-in">
+          <?php
+            $build = function($p) use ($f) {
+              $q = array_filter($f, fn($v)=> $v !== '' && $v !== null);
+              $q['page'] = $p;
+              return http_build_query($q);
+            };
+            $pgCls = 'min-w-[2.25rem] text-center rounded-lg border px-2.5 py-1.5 text-sm transition ';
+          ?>
+          <?php for ($p=1; $p<=$totalPages; $p++): ?>
+            <a href="<?= $base ?>/cars?<?= e($build($p)) ?>"
+               class="<?= $pgCls ?><?= $p===$page ? 'bg-brand border-brand text-white font-semibold' : 'border-white/10 text-zinc-300 hover:bg-white/10' ?>">
+               <?= (int)$p ?>
+            </a>
+          <?php endfor; ?>
+        </nav>
       <?php endif; ?>
-    </section>
+    <?php endif; ?>
   </div>
 </div>
