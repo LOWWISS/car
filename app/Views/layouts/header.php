@@ -132,7 +132,7 @@ $sbSection = function (string $label, string $plusHref = '', string $plusTitle =
     </script>
 
     <!-- App CSS (reusable component classes via @apply) -->
-    <link rel="stylesheet" href="<?= e($assetBase) ?>/css/app.css?v=7">
+    <link rel="stylesheet" href="<?= e($assetBase) ?>/css/app.css?v=8">
 </head>
 <body class="h-full bg-slate-50 text-slate-800 font-sans antialiased min-h-screen">
 
@@ -324,25 +324,23 @@ $sbSection = function (string $label, string $plusHref = '', string $plusTitle =
   <?php endif; ?>
 </header>
 
-<!-- ===== Flash messages ===== -->
+<!-- ===== Flash messages (hidden — JS upgrades them to the centered modal) ===== -->
 <div class="pt-16">
-<?php if (Session::hasFlash('success')): ?>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-    <div class="rounded-lg bg-green-50 border border-green-200 text-green-800 px-4 py-3 text-sm flash-slide animate-fade-in-up"><?= e(Session::getFlash('success')) ?></div>
-  </div>
-<?php endif; ?>
-<?php if (Session::hasFlash('error')): ?>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-    <div class="rounded-lg bg-red-50 border border-red-200 text-red-800 px-4 py-3 text-sm flash-slide animate-fade-in-up"><?= e(Session::getFlash('error')) ?></div>
-  </div>
-<?php endif; ?>
-<?php if (isset($_GET['error']) && $_GET['error'] === 'csrf'): ?>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-    <div class="rounded-lg bg-red-50 border border-red-200 text-red-800 px-4 py-3 text-sm flash-slide animate-fade-in-up">Security token expired. Please try again.</div>
+<?php if (Session::hasFlash('success') || Session::hasFlash('error') || (isset($_GET['error']) && $_GET['error'] === 'csrf')): ?>
+  <div hidden>
+    <?php if (Session::hasFlash('success')): ?>
+      <div class="rounded-lg bg-green-50 border border-green-200 flash-slide"><?= e(Session::getFlash('success')) ?></div>
+    <?php endif; ?>
+    <?php if (Session::hasFlash('error')): ?>
+      <div class="rounded-lg bg-red-50 border border-red-200 flash-slide"><?= e(Session::getFlash('error')) ?></div>
+    <?php endif; ?>
+    <?php if (isset($_GET['error']) && $_GET['error'] === 'csrf'): ?>
+      <div class="rounded-lg bg-red-50 border border-red-200 flash-slide">Security token expired. Please try again.</div>
+    <?php endif; ?>
   </div>
 <?php endif; ?>
 
 <!-- ===== Toast container (for AJAX notifications) ===== -->
-<div id="toast" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+<div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 space-y-2 flex flex-col items-center"></div>
 
 <main class="flex-1 min-w-0">

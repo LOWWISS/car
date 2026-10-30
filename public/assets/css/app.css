@@ -332,12 +332,13 @@
 
 /* Toasts */
 .toast {
-  background: #fff;
-  border: 1px solid var(--slate-200);
+  background: #1c1c22;
+  border: 1px solid rgba(255,255,255,.1);
   border-left: 4px solid var(--brand);
   border-radius: 0.5rem;
   padding: 0.75rem 1rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,.1);
+  box-shadow: 0 8px 24px rgba(0,0,0,.45);
+  color: #e4e4e7;
   font-size: 0.875rem;
   min-width: 240px;
   max-width: 360px;

@@ -12,17 +12,104 @@
     var container = document.getElementById('toast');
     if (!container) return;
     var el = document.createElement('div');
-    el.className = 'toast ' + (type || 'info') + ' animate-slide-in-right';
+    el.className = 'toast ' + (type || 'info') + ' animate-scale-in';
     el.textContent = message;
     container.appendChild(el);
     setTimeout(function () {
       el.style.opacity = '0';
-      el.style.transform = 'translateX(20px)';
+      el.style.transform = 'translateY(-8px)';
       el.style.transition = 'opacity .3s, transform .3s';
       setTimeout(function () { el.remove(); }, 300);
     }, 4000);
   }
   window.toast = toast;
+
+  // ---- Centered confirm modal (replaces native confirm(), dark chrome) ----
+  window.appConfirm = function (message, opts) {
+    opts = opts || {};
+    return new Promise(function (resolve) {
+      var overlay = document.createElement('div');
+      overlay.className = 'fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4';
+      overlay.innerHTML =
+        '<div class="w-full max-w-sm rounded-xl border border-white/10 bg-[#1c1c22] p-5 shadow-2xl shadow-black/60 animate-scale-in">' +
+          '<div class="flex items-start gap-3">' +
+            '<span class="w-9 h-9 shrink-0 rounded-lg bg-red-500/15 text-red-400 flex items-center justify-center">' +
+              '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>' +
+            '</span>' +
+            '<p class="pt-1.5 text-sm text-zinc-200 leading-relaxed">' + escapeHtml(message) + '</p>' +
+          '</div>' +
+          '<div class="mt-5 flex justify-end gap-2">' +
+            '<button type="button" data-cf="no" class="rounded-lg border border-white/10 px-3.5 py-2 text-sm text-zinc-300 hover:bg-white/10 transition">' + escapeHtml(opts.cancelText || 'Cancel') + '</button>' +
+            '<button type="button" data-cf="yes" class="rounded-lg bg-auction px-3.5 py-2 text-sm font-semibold text-white hover:bg-auction-dark transition">' + escapeHtml(opts.confirmText || 'Confirm') + '</button>' +
+          '</div>' +
+        '</div>';
+      function done(v) {
+        overlay.remove();
+        document.removeEventListener('keydown', onKey);
+        resolve(v);
+      }
+      function onKey(e) { if (e.key === 'Escape') done(false); }
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) { done(false); return; }
+        var b = e.target.closest('[data-cf]');
+        if (b) done(b.getAttribute('data-cf') === 'yes');
+      });
+      document.addEventListener('keydown', onKey);
+      document.body.appendChild(overlay);
+      overlay.querySelector('[data-cf="no"]').focus();
+    });
+  };
+
+  // ---- SweetAlert-style centered alert (flash messages, notices) ----
+  window.appAlert = function (message, type) {
+    var meta = ({
+      success: ['Success', 'bg-emerald-500/15 text-emerald-400 border-emerald-400/30', 'M5 13l4 4L19 7'],
+      error:   ['Error',   'bg-red-500/15 text-red-400 border-red-400/30',           'M6 18L18 6M6 6l12 12'],
+      info:    ['Notice',  'bg-blue-500/15 text-blue-400 border-blue-400/30',        'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z']
+    })[type || 'info'] || ['Notice', 'bg-blue-500/15 text-blue-400 border-blue-400/30', 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'];
+
+    return new Promise(function (resolve) {
+      var overlay = document.createElement('div');
+      overlay.className = 'fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4';
+      overlay.innerHTML =
+        '<div class="w-full max-w-sm rounded-xl border border-white/10 bg-[#1c1c22] p-6 text-center shadow-2xl shadow-black/60 animate-scale-in">' +
+          '<span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full border ' + meta[1] + '">' +
+            '<svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="' + meta[2] + '"/></svg>' +
+          '</span>' +
+          '<h3 class="mt-4 text-lg font-semibold text-white">' + meta[0] + '</h3>' +
+          '<p class="mt-1.5 text-sm text-zinc-400 leading-relaxed">' + escapeHtml(message) + '</p>' +
+          '<button type="button" data-ok class="mt-5 w-full rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark transition">OK</button>' +
+        '</div>';
+      function done() {
+        overlay.remove();
+        document.removeEventListener('keydown', onKey);
+        resolve();
+      }
+      function onKey(e) { if (e.key === 'Escape' || e.key === 'Enter') done(); }
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay || e.target.closest('[data-ok]')) done();
+      });
+      document.addEventListener('keydown', onKey);
+      document.body.appendChild(overlay);
+      overlay.querySelector('[data-ok]').focus();
+    });
+  };
+
+  // Upgrade server-rendered .flash-slide banners into the centered modal.
+  // Accepts either live DOM elements or nodes parsed from a PJAX response.
+  function flashToModal(nodes) {
+    var list = (nodes && nodes.length)
+      ? Array.prototype.slice.call(nodes)
+      : Array.prototype.slice.call(document.querySelectorAll('.flash-slide'));
+    var chain = Promise.resolve();
+    list.forEach(function (f) {
+      var msg = (f.textContent || '').replace(/\s+/g, ' ').trim();
+      var isErr = /bg-red-50|border-red-200/.test(f.className || '');
+      if (f.remove) f.remove();
+      if (!msg) return;
+      chain = chain.then(function () { return appAlert(msg, isErr ? 'error' : 'success'); });
+    });
+  }
 
   // ---- HTML escape for AJAX-injected content (defense in depth vs XSS) ----
   function escapeHtml(s) {
@@ -164,62 +251,65 @@
       var form = e.target.closest('[data-delete-image-form]');
       if (!form) return;
       e.preventDefault();
-      if (!confirm('Delete this image?')) return;
 
-      // Extract the image ID from the form's id (e.g. "delete-image-form-7")
-      var idMatch = form.id && form.id.match(/delete-image-form-(\d+)$/);
-      var imageId = idMatch ? idMatch[1] : null;
+      appConfirm('Delete this image?', { confirmText: 'Delete' }).then(function (ok) {
+        if (!ok) return;
 
-      // The trash button is elsewhere in the DOM (inside the main form), linked
-      // via form="delete-image-form-{id}". Find it by that attribute.
-      var btn = imageId
-        ? document.querySelector('button[form="delete-image-form-' + imageId + '"]')
-        : form.querySelector('button[type="submit"]');
-      var wrapper = imageId
-        ? document.querySelector('[data-image-wrapper="' + imageId + '"]')
-        : form.closest('[data-image-wrapper]');
-      var originalHTML = btn ? btn.innerHTML : '';
+        // Extract the image ID from the form's id (e.g. "delete-image-form-7")
+        var idMatch = form.id && form.id.match(/delete-image-form-(\d+)$/);
+        var imageId = idMatch ? idMatch[1] : null;
 
-      // Show a spinner + disable while deleting
-      if (btn) {
-        btn.disabled = true;
-        btn.classList.add('opacity-75', 'cursor-wait');
-        btn.innerHTML = '<svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0110 10" stroke-linecap="round"/></svg>';
-      }
+        // The trash button is elsewhere in the DOM (inside the main form), linked
+        // via form="delete-image-form-{id}". Find it by that attribute.
+        var btn = imageId
+          ? document.querySelector('button[form="delete-image-form-' + imageId + '"]')
+          : form.querySelector('button[type="submit"]');
+        var wrapper = imageId
+          ? document.querySelector('[data-image-wrapper="' + imageId + '"]')
+          : form.closest('[data-image-wrapper]');
+        var originalHTML = btn ? btn.innerHTML : '';
 
-      fetch(form.action, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: new URLSearchParams(new FormData(form)).toString()
-      })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-          if (data.success) {
-            // Fade out + collapse the thumbnail before removing it
-            if (wrapper) {
-              wrapper.style.transition = 'opacity .25s ease, transform .25s ease';
-              wrapper.style.opacity = '0';
-              wrapper.style.transform = 'scale(0.8)';
-              setTimeout(function () { wrapper.remove(); }, 250);
-            }
-            toast('Image deleted', 'success');
-          } else {
-            toast(data.message || 'Delete failed', 'error');
-            if (btn) {
-              btn.disabled = false;
-              btn.classList.remove('opacity-75', 'cursor-wait');
-              btn.innerHTML = originalHTML;
-            }
-          }
+        // Show a spinner + disable while deleting
+        if (btn) {
+          btn.disabled = true;
+          btn.classList.add('opacity-75', 'cursor-wait');
+          btn.innerHTML = '<svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0110 10" stroke-linecap="round"/></svg>';
+        }
+
+        fetch(form.action, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: new URLSearchParams(new FormData(form)).toString()
         })
-        .catch(function () {
-          toast('Network error — retrying...', 'error');
-          // Fallback: submit the form normally (non-AJAX)
-          form.submit();
-        });
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (data.success) {
+              // Fade out + collapse the thumbnail before removing it
+              if (wrapper) {
+                wrapper.style.transition = 'opacity .25s ease, transform .25s ease';
+                wrapper.style.opacity = '0';
+                wrapper.style.transform = 'scale(0.8)';
+                setTimeout(function () { wrapper.remove(); }, 250);
+              }
+              toast('Image deleted', 'success');
+            } else {
+              toast(data.message || 'Delete failed', 'error');
+              if (btn) {
+                btn.disabled = false;
+                btn.classList.remove('opacity-75', 'cursor-wait');
+                btn.innerHTML = originalHTML;
+              }
+            }
+          })
+          .catch(function () {
+            toast('Network error — retrying...', 'error');
+            // Fallback: submit the form normally (non-AJAX)
+            form.submit();
+          });
+      });
     });
   }
   bindImageDelete();
@@ -373,6 +463,7 @@
     startBidPolling();
     tickCountdowns();
     updateHeaderState();
+    flashToModal();
   }
 
   // ---- Notification badge updater ----
@@ -504,6 +595,9 @@
 
         // Re-execute inline scripts (e.g. window.CAR_DETAIL on detail page)
         reexecuteScripts(mainEl);
+
+        // Flash banners from the PJAX response -> centered alert modal
+        flashToModal(parsed.flash);
 
         // Update page title
         if (parsed.title) document.title = parsed.title;
