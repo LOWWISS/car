@@ -440,6 +440,38 @@
       .catch(function () { toast('Network error', 'error'); });
   });
 
+  // Auto-submit filter forms: selects apply instantly; text/number inputs
+  // apply after a short typing pause. GET submits go through PJAX so only
+  // <main> swaps — header/sidebar don't reload.
+  function submitViaPjax(form) {
+    if (form.method.toLowerCase() === 'get' && typeof pjaxNavigate === 'function') {
+      var params = new URLSearchParams();
+      new FormData(form).forEach(function (v, k) { if (String(v).trim() !== '') params.append(k, v); });
+      var q = params.toString();
+      pjaxNavigate(form.action + (q ? '?' + q : ''), true);
+    } else {
+      form.submit();
+    }
+  }
+  var _autoSubmitTimer = null;
+  document.addEventListener('change', function (e) {
+    var form = e.target.closest('form[data-autosubmit]');
+    if (form) submitViaPjax(form);
+  });
+  document.addEventListener('input', function (e) {
+    var form = e.target.closest('form[data-autosubmit]');
+    if (!form || !e.target.matches('input[type="text"], input[type="number"], input[type="search"]')) return;
+    clearTimeout(_autoSubmitTimer);
+    _autoSubmitTimer = setTimeout(function () { submitViaPjax(form); }, 600);
+  });
+  document.addEventListener('submit', function (e) {
+    var form = e.target.closest('form[data-autosubmit]');
+    if (!form) return;
+    e.preventDefault();
+    clearTimeout(_autoSubmitTimer);
+    submitViaPjax(form);
+  });
+
   // Forms with data-confirm="msg" -> centered appConfirm modal before submit.
   document.addEventListener('submit', function (e) {
     var form = e.target.closest('form[data-confirm]');

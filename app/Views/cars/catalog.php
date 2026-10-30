@@ -4,7 +4,7 @@ $base = rtrim(Config::get('APP_URL','/car'),'/');
 $f = $filters;
 $bodyTypes = ['Sedan','SUV','Pickup','Hatchback','Coupe','Convertible','Van','Wagon'];
 $sorts = ['newest'=>'Newest','oldest'=>'Oldest','price_low'=>'Price ↑','price_high'=>'Price ↓','ending'=>'Ending soon','year_desc'=>'Year ↓'];
-$inputCls = 'w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:ring-2 focus:ring-brand/60 focus:border-brand/60 outline-none transition';
+$inputCls = 'dark-field w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 focus:ring-2 focus:ring-brand/60 focus:border-brand/60 outline-none transition';
 $labelCls = 'block text-[11px] font-semibold uppercase tracking-wider text-zinc-500 mb-1.5';
 
 // Active-filter chips (each links back with that param removed)
@@ -40,7 +40,7 @@ foreach ($chipLabels as $key => $label) {
     </div>
 
     <!-- Filter bar -->
-    <form method="get" action="<?= $base ?>/cars" class="rounded-xl border border-white/[0.07] bg-white/[0.02] p-4 mb-6 animate-fade-in-up">
+    <form method="get" action="<?= $base ?>/cars" data-autosubmit class="rounded-xl border border-white/[0.07] bg-white/[0.02] p-4 mb-6 animate-fade-in-up">
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <div class="col-span-2 sm:col-span-1 lg:col-span-1">
           <label class="<?= $labelCls ?>">Search</label>
@@ -89,8 +89,8 @@ foreach ($chipLabels as $key => $label) {
         </div>
       </div>
       <div class="flex items-center gap-2 mt-4 pt-3 border-t border-white/[0.07]">
-        <button type="submit" class="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark transition">Apply filters</button>
         <a href="<?= $base ?>/cars" class="rounded-lg border border-white/10 px-4 py-2 text-sm text-zinc-300 hover:bg-white/10 transition">Reset</a>
+        <span class="text-xs text-zinc-600">Filters apply automatically</span>
       </div>
     </form>
 

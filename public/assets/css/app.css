@@ -344,6 +344,12 @@
   max-width: 360px;
   animation: toast-in .2s ease;
 }
+/* Dark selects: paint the native dropdown list to match the black chrome */
+select.dark-field option {
+  background-color: #1c1c22;
+  color: #e4e4e7;
+}
+
 .toast.success { border-left-color: #16a34a; }
 .toast.error   { border-left-color: var(--auction); }
 .toast.info    { border-left-color: var(--brand); }
