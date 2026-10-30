@@ -297,7 +297,14 @@
         .then(function (r) { return r.json(); })
         .then(function (data) {
           if (data.success) {
-            document.querySelectorAll('li .bg-auction').forEach(function (d) { d.classList.remove('bg-auction'); d.classList.add('bg-slate-300'); });
+            document.querySelectorAll('.notif-dot').forEach(function (d) { d.remove(); });
+            document.querySelectorAll('.notif-row').forEach(function (r) {
+              r.classList.remove('bg-white/[0.03]');
+              r.classList.add('opacity-60');
+              var p = r.querySelector('p');
+              if (p) { p.classList.remove('text-zinc-100', 'font-medium'); p.classList.add('text-zinc-400'); }
+            });
+            markReadBtn.remove();
             toast('All notifications marked read', 'success');
             updateNotifBadge(0);
           }
@@ -464,11 +471,11 @@
       linkPath = linkPath.replace(/\/$/, '') || '/';
       var currentPath = path.replace(/\/$/, '') || '/';
       if (linkPath === currentPath) {
-        a.classList.add('text-brand', 'bg-slate-100');
-        a.classList.remove('text-slate-600');
+        a.classList.add('text-white', 'bg-white/10');
+        a.classList.remove('text-zinc-400');
       } else {
-        a.classList.remove('text-brand', 'bg-slate-100');
-        a.classList.add('text-slate-600');
+        a.classList.remove('text-white', 'bg-white/10');
+        a.classList.add('text-zinc-400');
       }
     });
   }

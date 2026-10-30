@@ -144,7 +144,7 @@ final class CarController extends BaseController
             $notif->send(
                 (int) $admin['id'],
                 'A new listing "' . $d['title'] . '" was submitted and is awaiting review.',
-                'listing', '/admin'
+                'listing', '/admin/review/' . $id
             );
         }
 

@@ -86,7 +86,7 @@ final class BidController extends BaseController
         // handover / completion lifecycle is tracked (winning != completed).
         $winBidId = $this->bids->place((int) $carId, Auth::id(), (float) $car['buy_now_price']);
         $this->cars->setStatus((int) $carId, 'sold');
-        $this->transactions->createForWin(
+        $txId = $this->transactions->createForWin(
             (int) $carId,
             (int) $car['seller_id'],
             Auth::id(),
@@ -97,12 +97,12 @@ final class BidController extends BaseController
         $this->notifications->send(
             (int) $car['seller_id'],
             'Your listing "' . $car['title'] . '" was sold via Buy Now for ' . number_format((float) $car['buy_now_price'], 2) . '. A transaction has been created.',
-            'sale', '/transactions'
+            'sale', '/transactions/view/' . $txId
         );
         $this->notifications->send(
             Auth::id(),
             'You won "' . $car['title'] . '" via Buy Now. Payment is now required to complete the purchase.',
-            'won', '/transactions'
+            'won', '/transactions/view/' . $txId
         );
         Logger::audit('buy_now', ['car' => $carId, 'amount' => $car['buy_now_price']], Auth::id());
         $this->flashRedirect('success', 'Congratulations! You purchased this car via Buy Now. Please complete payment under your Transactions.', '/transactions');

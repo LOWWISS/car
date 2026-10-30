@@ -159,7 +159,7 @@ final class AdminController extends BaseController
         (new Notification())->send(
             (int) $car['seller_id'],
             'Your listing "' . $car['title'] . '" was rejected. Please review and resubmit.',
-            'listing', '/dashboard'
+            'listing', '/cars/edit/' . (int) $id
         );
         Logger::audit('listing_reject', ['car' => $id], Auth::id());
         $this->flashRedirect('success', 'Listing rejected.', '/admin');

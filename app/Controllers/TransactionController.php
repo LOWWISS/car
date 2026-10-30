@@ -191,12 +191,12 @@ final class TransactionController extends BaseController
         $this->notifications->send(
             (int) $tx['seller_id'],
             'Transaction #' . (int) $tx['id'] . ' was cancelled by an admin. The listing has been reverted to closed.',
-            'sale', '/transactions'
+            'sale', '/transactions/view/' . (int) $tx['id']
         );
         $this->notifications->send(
             (int) $tx['winner_id'],
             'Transaction #' . (int) $tx['id'] . ' was cancelled by an admin.',
-            'sale', '/transactions'
+            'sale', '/transactions/view/' . (int) $tx['id']
         );
         Logger::audit('tx_cancelled', ['tx' => $id], Auth::id());
         $this->flashRedirect('success', 'Transaction cancelled.', '/transactions');

@@ -51,17 +51,17 @@ final class AuctionCloser
                 $winBidId    = $car['highest_bid_id'] ? (int) $car['highest_bid_id'] : null;
 
                 $carModel->setStatus($carId, 'sold');
-                $txModel->createForWin($carId, $sellerId, $winnerId, $winBidId, $winAmount);
+                $txId = $txModel->createForWin($carId, $sellerId, $winnerId, $winBidId, $winAmount);
 
                 $notif->send(
                     $sellerId,
                     'Your listing "' . $car['title'] . '" was sold for ' . number_format($winAmount, 2) . '. A transaction has been created.',
-                    'sale', '/transactions'
+                    'sale', '/transactions/view/' . $txId
                 );
                 $notif->send(
                     $winnerId,
                     'Congratulations! You won "' . $car['title'] . '" with a bid of ' . number_format($winAmount, 2) . '. Payment is now required.',
-                    'won', '/transactions'
+                    'won', '/transactions/view/' . $txId
                 );
 
                 // Email the winner (best-effort; Mailer falls back to mail()).

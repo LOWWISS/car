@@ -83,22 +83,22 @@ if ($pageSubtitle === '' && $currentUser) {
 // Sidebar nav helpers (used by the logged-in aside below).
 $sbBadge = function (int $n, bool $accent = false): string {
     if ($n <= 0) return '';
-    $cls = $accent ? 'bg-brand/10 text-brand' : 'bg-slate-100 text-slate-500';
+    $cls = $accent ? 'bg-brand/25 text-indigo-300' : 'bg-white/10 text-zinc-300';
     return '<span class="sidebar-label ml-auto rounded-md px-1.5 py-0.5 text-[11px] font-semibold ' . $cls . '">' . $n . '</span>';
 };
 $sbLink = function (string $href, string $label, string $icon, string $right = '', string $stagger = '') use ($appUrl): string {
-    return '<a href="' . $appUrl . $href . '" class="sidebar-link group flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition animate-slide-in-left ' . $stagger . '">'
-        . '<svg class="w-[18px] h-[18px] shrink-0 text-slate-400 transition group-hover:text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="' . $icon . '"/></svg>'
+    return '<a href="' . $appUrl . $href . '" class="sidebar-link group flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium text-zinc-400 hover:bg-white/5 hover:text-white transition animate-slide-in-left ' . $stagger . '">'
+        . '<svg class="w-[18px] h-[18px] shrink-0 text-zinc-500 transition group-hover:text-zinc-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="' . $icon . '"/></svg>'
         . '<span class="sidebar-label truncate">' . e($label) . '</span>' . $right . '</a>';
 };
 $sbSection = function (string $label, string $plusHref = '', string $plusTitle = '') use ($appUrl): string {
     $plus = '';
     if ($plusHref !== '') {
-        $plus = '<a href="' . $appUrl . $plusHref . '" class="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition" title="' . e($plusTitle) . '" aria-label="' . e($plusTitle) . '">'
+        $plus = '<a href="' . $appUrl . $plusHref . '" class="p-1 rounded-md text-zinc-500 hover:text-white hover:bg-white/10 transition" title="' . e($plusTitle) . '" aria-label="' . e($plusTitle) . '">'
             . '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg></a>';
     }
     return '<div class="sidebar-label flex items-center justify-between px-2.5 pb-1.5">'
-        . '<span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">' . e($label) . '</span>' . $plus . '</div>';
+        . '<span class="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">' . e($label) . '</span>' . $plus . '</div>';
 };
 ?>
 <!DOCTYPE html>
@@ -139,18 +139,18 @@ $sbSection = function (string $label, string $plusHref = '', string $plusTitle =
 <?php if (Auth::check()): ?>
 <!-- ===== Sidebar (full height, left of header) ===== -->
 <div class="flex min-h-screen">
-  <aside id="sidebar" class="fixed top-0 left-0 z-50 w-64 h-screen bg-white border-r border-slate-200 transform -translate-x-full lg:translate-x-0 transition-all duration-200 overflow-y-auto shrink-0 flex flex-col">
+  <aside id="sidebar" class="fixed top-0 left-0 z-50 w-64 h-screen bg-[#0f0f12] border-r border-white/10 transform -translate-x-full lg:translate-x-0 transition-all duration-200 overflow-y-auto shrink-0 flex flex-col">
     <!-- Workspace header -->
-    <div id="sidebarHeader" class="h-14 flex items-center gap-2 px-3.5 border-b border-slate-100 shrink-0">
+    <div id="sidebarHeader" class="h-14 flex items-center gap-2 px-3.5 border-b border-white/10 shrink-0">
       <a id="sidebarLogo" href="<?= $appUrl ?><?= Auth::is('admin') ? '/admin' : '/dashboard' ?>" class="flex items-center gap-2.5 min-w-0 group" aria-label="CarAuction home">
         <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand to-blue-500 flex items-center justify-center shadow-sm shadow-brand/25 shrink-0 transition group-hover:shadow-md group-hover:shadow-brand/40 group-hover:scale-105">
           <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 13l2-5h14l2 5M5 13h14v5H5z M7 18v2 M17 18v2"/>
           </svg>
         </span>
-        <span id="sidebarLogoText" class="font-semibold text-[15px] tracking-tight text-slate-900 truncate">CarAuction</span>
+        <span id="sidebarLogoText" class="font-semibold text-[15px] tracking-tight text-white truncate">CarAuction</span>
       </a>
-      <button type="button" data-toggle="collapse-sidebar" class="ml-auto p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition shrink-0" aria-label="Collapse sidebar" title="Collapse sidebar">
+      <button type="button" data-toggle="collapse-sidebar" class="ml-auto p-1.5 rounded-lg hover:bg-white/10 text-zinc-500 hover:text-white transition shrink-0" aria-label="Collapse sidebar" title="Collapse sidebar">
         <svg id="collapseIcon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
         </svg>
@@ -160,13 +160,13 @@ $sbSection = function (string $label, string $plusHref = '', string $plusTitle =
     <!-- Search -->
     <div class="px-3 pt-3 sidebar-label">
       <form action="<?= $appUrl ?>/cars" method="get" role="search">
-        <div class="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-[7px] focus-within:border-brand/60 focus-within:bg-white focus-within:ring-2 focus-within:ring-brand/10 transition">
-          <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <div class="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-2.5 py-[7px] focus-within:border-white/25 focus-within:bg-white/[0.08] focus-within:ring-2 focus-within:ring-white/10 transition">
+          <svg class="w-4 h-4 text-zinc-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/>
           </svg>
           <input id="sidebarSearch" name="q" type="text" placeholder="Search cars" autocomplete="off"
-                 class="w-full bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none">
-          <kbd class="hidden sm:inline shrink-0 rounded border border-slate-200 bg-white px-1.5 py-px text-[10px] font-semibold text-slate-400">/</kbd>
+                 class="w-full bg-transparent text-sm text-zinc-200 placeholder:text-zinc-500 focus:outline-none">
+          <kbd class="hidden sm:inline shrink-0 rounded border border-white/10 bg-white/5 px-1.5 py-px text-[10px] font-semibold text-zinc-500">/</kbd>
         </div>
       </form>
     </div>
@@ -218,14 +218,14 @@ $sbSection = function (string $label, string $plusHref = '', string $plusTitle =
 
     <!-- Sidebar footer with user info -->
     <div class="mt-auto shrink-0">
-      <div id="sidebarFooter" class="border-t border-slate-100 bg-white p-3.5 flex items-center gap-3">
+      <div id="sidebarFooter" class="border-t border-white/10 bg-[#0f0f12] p-3.5 flex items-center gap-3">
         <span class="w-9 h-9 rounded-lg bg-gradient-to-br from-brand to-blue-500 text-white flex items-center justify-center text-sm font-semibold shrink-0 shadow-sm shadow-brand/25">
           <?= e(strtoupper(substr($currentUser['name'], 0, 1))) ?>
         </span>
         <div class="sidebar-label min-w-0">
-          <div class="text-sm font-medium text-slate-800 truncate"><?= e($currentUser['name']) ?></div>
-          <div class="text-xs text-slate-400 truncate"><?= e($currentUser['email'] ?? '') ?></div>
-          <span class="badge badge-info mt-1"><?= e(ucfirst(Auth::role())) ?></span>
+          <div class="text-sm font-medium text-zinc-100 truncate"><?= e($currentUser['name']) ?></div>
+          <div class="text-xs text-zinc-500 truncate"><?= e($currentUser['email'] ?? '') ?></div>
+          <span class="inline-flex items-center rounded-md bg-white/10 px-1.5 py-0.5 text-[11px] font-semibold text-zinc-300 mt-1"><?= e(ucfirst(Auth::role())) ?></span>
         </div>
       </div>
     </div>
@@ -239,11 +239,11 @@ $sbSection = function (string $label, string $plusHref = '', string $plusTitle =
 <?php endif; ?>
 
 <!-- ===== Navbar ===== -->
-<header id="siteHeader" class="fixed top-0 left-0 right-0 <?= Auth::check() ? 'lg:left-64' : '' ?> z-40 bg-white/90 backdrop-blur border-b border-slate-200">
+<header id="siteHeader" class="fixed top-0 left-0 right-0 <?= Auth::check() ? 'lg:left-64' : '' ?> z-40 backdrop-blur border-b <?= Auth::check() ? 'bg-[#0f0f12] border-white/10' : 'bg-white/90 border-slate-200' ?>">
   <nav class="px-4 sm:px-6 lg:px-8 h-16 flex items-center gap-4">
     <?php if (Auth::check()): ?>
       <!-- Mobile sidebar toggle (logged-in only) -->
-      <button type="button" data-toggle="mobile-sidebar" class="lg:hidden p-2 rounded-lg hdr-icon-btn text-slate-600 hover:bg-slate-100 transition" aria-label="Toggle menu">
+      <button type="button" data-toggle="mobile-sidebar" class="lg:hidden p-2 rounded-lg hdr-icon-btn text-zinc-400 hover:bg-white/10 hover:text-white transition" aria-label="Toggle menu">
         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
         </svg>
@@ -251,8 +251,8 @@ $sbSection = function (string $label, string $plusHref = '', string $plusTitle =
 
       <!-- Page indicator (title + subtitle) -->
       <div id="navPageTitle" class="min-w-0 hidden sm:block">
-        <div class="text-sm font-semibold hdr-title text-slate-800 truncate leading-tight"><?= e($pageTitle) ?></div>
-        <div id="navPageSubtitle" class="text-xs hdr-sub text-slate-400 truncate leading-tight"><?= e($pageSubtitle) ?></div>
+        <div class="text-sm font-semibold hdr-title text-zinc-100 truncate leading-tight"><?= e($pageTitle) ?></div>
+        <div id="navPageSubtitle" class="text-xs hdr-sub text-zinc-500 truncate leading-tight"><?= e($pageSubtitle) ?></div>
       </div>
     <?php else: ?>
       <!-- Logo (guests only) -->
@@ -277,7 +277,7 @@ $sbSection = function (string $label, string $plusHref = '', string $plusTitle =
 
       <?php if (Auth::check()): ?>
         <!-- Notifications bell -->
-        <a href="<?= $appUrl ?>/notifications" class="relative p-2 rounded-full hdr-icon-btn text-slate-600 hover:bg-slate-100 transition" aria-label="Notifications">
+        <a href="<?= $appUrl ?>/notifications" class="relative p-2 rounded-full hdr-icon-btn text-zinc-400 hover:bg-white/10 hover:text-white transition" aria-label="Notifications">
           <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1"/>
           </svg>
@@ -288,7 +288,7 @@ $sbSection = function (string $label, string $plusHref = '', string $plusTitle =
         <!-- Logout button -->
         <form method="post" action="<?= $appUrl ?>/logout">
           <input type="hidden" name="_csrf_token" value="<?= e(Csrf::token()) ?>">
-          <button type="submit" class="hdr-logout flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-auction border border-red-200 hover:bg-red-50 transition" aria-label="Log out" title="Log out">
+          <button type="submit" class="hdr-logout flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-red-400 border border-red-400/30 hover:bg-red-500/10 transition" aria-label="Log out" title="Log out">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
             </svg>
