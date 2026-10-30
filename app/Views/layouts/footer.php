@@ -7,6 +7,6 @@
 <?php endif; ?>
 
 <script nonce="<?= e(SecurityHeaders::cspNonce()) ?>">window.APP_BASE = <?= json_encode(rtrim(Config::get('APP_URL','/car'),'/')) ?>;</script>
-<script src="<?= rtrim(Config::get('APP_URL','/car'),'/') ?>/assets/js/app.js?v=25"></script>
+<script src="<?= rtrim(Config::get('APP_URL','/car'),'/') ?>/assets/js/app.js?v=32"></script>
 </body>
 </html>

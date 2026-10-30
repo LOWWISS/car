@@ -29,12 +29,12 @@ foreach ($chipLabels as $key => $label) {
       <?php if ($chips): ?>
         <div class="flex flex-wrap items-center gap-2">
           <?php foreach ($chips as [$text, $href]): ?>
-            <a href="<?= $base ?><?= e($href) ?>" class="group inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300 hover:border-red-400/40 hover:text-red-300 transition">
+            <a href="<?= $base ?><?= e($href) ?>" data-pjax class="group inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300 hover:border-red-400/40 hover:text-red-300 transition">
               <?= e($text) ?>
               <svg class="w-3 h-3 opacity-60 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </a>
           <?php endforeach; ?>
-          <a href="<?= $base ?>/cars" class="text-xs text-zinc-500 hover:text-white transition underline underline-offset-2">Clear all</a>
+          <a href="<?= $base ?>/cars" data-pjax class="text-xs text-zinc-500 hover:text-white transition underline underline-offset-2">Clear all</a>
         </div>
       <?php endif; ?>
     </div>
@@ -89,7 +89,7 @@ foreach ($chipLabels as $key => $label) {
         </div>
       </div>
       <div class="flex items-center gap-2 mt-4 pt-3 border-t border-white/[0.07]">
-        <a href="<?= $base ?>/cars" class="rounded-lg border border-white/10 px-4 py-2 text-sm text-zinc-300 hover:bg-white/10 transition">Reset</a>
+        <a href="<?= $base ?>/cars" data-pjax class="rounded-lg border border-white/10 px-4 py-2 text-sm text-zinc-300 hover:bg-white/10 transition">Reset</a>
         <span class="text-xs text-zinc-600">Filters apply automatically</span>
       </div>
     </form>
@@ -102,7 +102,7 @@ foreach ($chipLabels as $key => $label) {
         </div>
         <h3 class="text-base font-semibold text-zinc-200">No cars match your filters</h3>
         <p class="mt-1 text-sm text-zinc-500">Try adjusting your search or clearing filters.</p>
-        <a href="<?= $base ?>/cars" class="inline-block mt-4 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark transition">Clear all filters</a>
+        <a href="<?= $base ?>/cars" data-pjax class="inline-block mt-4 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark transition">Clear all filters</a>
       </div>
     <?php else: ?>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
@@ -123,7 +123,7 @@ foreach ($chipLabels as $key => $label) {
             $pgCls = 'min-w-[2.25rem] text-center rounded-lg border px-2.5 py-1.5 text-sm transition ';
           ?>
           <?php for ($p=1; $p<=$totalPages; $p++): ?>
-            <a href="<?= $base ?>/cars?<?= e($build($p)) ?>"
+            <a href="<?= $base ?>/cars?<?= e($build($p)) ?>" data-pjax
                class="<?= $pgCls ?><?= $p===$page ? 'bg-brand border-brand text-white font-semibold' : 'border-white/10 text-zinc-300 hover:bg-white/10' ?>">
                <?= (int)$p ?>
             </a>

@@ -215,7 +215,18 @@ final class AdminController extends BaseController
     public function logs(): void
     {
         Middleware::requireRole('admin');
-        $logs = (new AuditLog())->recent(200);
-        $this->view('admin/logs', ['pageTitle' => 'Audit Logs', 'logs' => $logs]);
+        $f = [
+            'q'      => trim((string) ($_GET['q'] ?? '')),
+            'action' => trim((string) ($_GET['action'] ?? '')),
+            'from'   => trim((string) ($_GET['from'] ?? '')),
+            'to'     => trim((string) ($_GET['to'] ?? '')),
+        ];
+        $model = new AuditLog();
+        $this->view('admin/logs', [
+            'pageTitle' => 'Audit Logs',
+            'logs'      => $model->search($f, 300),
+            'actions'   => $model->actions(),
+            'filters'   => $f,
+        ]);
     }
 }

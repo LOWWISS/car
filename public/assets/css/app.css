@@ -344,6 +344,54 @@
   max-width: 360px;
   animation: toast-in .2s ease;
 }
+/* ---------- Print styles: report-friendly output ---------- */
+@media print {
+  /* Hide app chrome + interactive-only elements */
+  #sidebar, #siteHeader, #sidebarOverlay, #toast, #pageLoader,
+  .no-print, .flash-slide, .scroll-top { display: none !important; }
+
+  /* Content takes the full page, light background for paper */
+  #mainColumn { margin-left: 0 !important; }
+  body { background: #fff !important; }
+  .pt-16 { padding-top: 0 !important; }
+
+  /* Dark surfaces -> black ink on white paper */
+  .print-area, .print-area * {
+    color: #111 !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    border-color: #ccc !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+    animation: none !important;
+  }
+  .print-area { border: none !important; }
+  .print-area > div:last-child { border: 1px solid #bbb !important; border-radius: 0 !important; }
+
+  /* Table that reads like a report */
+  .print-area table { font-size: 11px; border-collapse: collapse; }
+  .print-area thead { display: table-header-group; }  /* repeat header each page */
+  .print-area th {
+    border-bottom: 2px solid #555 !important;
+    padding: 6px 8px !important;
+    text-align: left;
+  }
+  .print-area td { padding: 5px 8px !important; border-bottom: 1px solid #ddd !important; }
+  .print-area tbody tr:nth-child(even) td { background: #f5f5f5 !important; }
+  .print-area tr { page-break-inside: avoid; }
+  .print-area td.truncate, .print-area .truncate {
+    max-width: none !important; overflow: visible !important;
+    text-overflow: clip !important; white-space: normal !important;
+  }
+  /* Action pills -> bordered text badges, ink-friendly */
+  .print-area span {
+    border: 1px solid #888 !important;
+    padding: 0 4px !important;
+  }
+}
+
+@page { margin: 1.5cm; }
+
 /* Dark selects: paint the native dropdown list to match the black chrome */
 select.dark-field option {
   background-color: #1c1c22;

@@ -440,6 +440,54 @@
       .catch(function () { toast('Network error', 'error'); });
   });
 
+  // Header date pickers: sync into the filter form and apply.
+  document.addEventListener('change', function (e) {
+    var inp = e.target.closest('[data-report-date]');
+    if (!inp) return;
+    var form = document.querySelector('form[data-autosubmit]');
+    if (!form) return;
+    var target = form.querySelector('[name="' + inp.getAttribute('data-report-date') + '"]');
+    if (target) { target.value = inp.value; submitViaPjax(form); }
+  });
+
+  // Report range picker: fills the filter form's from/to dates and applies.
+  document.addEventListener('change', function (e) {
+    var sel = e.target.closest('select[data-print-range]');
+    if (!sel) return;
+    var form = document.querySelector('form[data-autosubmit]');
+    if (!form) return;
+    var fmt = function (d) {
+      var p = function (n) { return String(n).padStart(2, '0'); };
+      return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+    };
+    var today = new Date(), from = '', to = '';
+    if (sel.value === 'today') { from = to = fmt(today); }
+    else if (sel.value === '7' || sel.value === '30') {
+      var d = new Date(today); d.setDate(d.getDate() - parseInt(sel.value, 10) + 1);
+      from = fmt(d); to = fmt(today);
+    } else if (sel.value === 'month') {
+      from = fmt(new Date(today.getFullYear(), today.getMonth(), 1)); to = fmt(today);
+    }
+    var fi = form.querySelector('[name="from"]'), ti = form.querySelector('[name="to"]');
+    if (fi) fi.value = from;
+    if (ti) ti.value = to;
+    submitViaPjax(form);
+  });
+
+  // Print buttons: [data-print] opens the browser print dialog.
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('[data-print]')) window.print();
+  });
+
+  // Links marked data-pjax navigate content-only (no chrome reload).
+  document.addEventListener('click', function (e) {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    var a = e.target.closest('a[data-pjax]');
+    if (!a) return;
+    e.preventDefault();
+    pjaxNavigate(a.href, true);
+  });
+
   // Auto-submit filter forms: selects apply instantly; text/number inputs
   // apply after a short typing pause. GET submits go through PJAX so only
   // <main> swaps — header/sidebar don't reload.
@@ -448,7 +496,10 @@
       var params = new URLSearchParams();
       new FormData(form).forEach(function (v, k) { if (String(v).trim() !== '') params.append(k, v); });
       var q = params.toString();
-      pjaxNavigate(form.action + (q ? '?' + q : ''), true);
+      // NOTE: use getAttribute('action') — a field named "action" (logs filter)
+      // shadows form.action with the element itself.
+      var action = form.getAttribute('action') || window.location.pathname;
+      pjaxNavigate(action + (q ? '?' + q : ''), true);
     } else {
       form.submit();
     }
@@ -597,23 +648,33 @@
 
   var pjaxEnabled = !!window.history && !!window.history.pushState;
 
-  // Loading bar
-  var loadingBar = document.createElement('div');
-  loadingBar.style.cssText = 'position:fixed;top:0;left:0;height:3px;width:0;background:#4f46e5;z-index:9999;transition:width .3s ease, opacity .3s ease;opacity:0';
-  document.body.appendChild(loadingBar);
+  // Floating loader — dark pill with spinner, centered under the header
+  var pageLoader = document.createElement('div');
+  pageLoader.id = 'pageLoader';
+  pageLoader.className = 'fixed inset-x-0 top-20 z-[70] hidden justify-center pointer-events-none';
+  pageLoader.innerHTML =
+    '<div class="flex items-center gap-2.5 rounded-full border border-white/10 bg-[#1c1c22] px-4 py-2 shadow-xl shadow-black/50 animate-fade-in">' +
+      '<svg class="w-4 h-4 animate-spin text-brand" fill="none" viewBox="0 0 24 24">' +
+        '<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"/>' +
+        '<path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"/>' +
+      '</svg>' +
+      '<span class="text-xs font-medium text-zinc-300">Loading…</span>' +
+    '</div>';
+  document.body.appendChild(pageLoader);
 
   function showLoading() {
-    loadingBar.style.opacity = '1';
-    loadingBar.style.width = '30%';
-    setTimeout(function () { loadingBar.style.width = '60%'; }, 100);
+    pageLoader.classList.remove('hidden');
+    pageLoader.classList.add('flex');
   }
   function hideLoading() {
-    loadingBar.style.width = '100%';
     setTimeout(function () {
-      loadingBar.style.opacity = '0';
-      setTimeout(function () { loadingBar.style.width = '0'; }, 300);
+      pageLoader.classList.add('hidden');
+      pageLoader.classList.remove('flex');
     }, 200);
   }
+  // Global API — use anywhere: showLoading() / hideLoading()
+  window.showLoading = showLoading;
+  window.hideLoading = hideLoading;
 
   // Extract <main> content from a full HTML document string
   function extractMain(html) {
