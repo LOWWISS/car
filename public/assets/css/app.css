@@ -348,6 +348,7 @@
 .light-mode body,
 .light-mode .bg-\[\#0f0f12\] { background-color: #f8fafc !important; color: #334155 !important; }
 .light-mode #siteHeader, .light-mode #sidebar { background: #fff !important; border-color: #e2e8f0 !important; }
+.light-mode .bg-\[\#1c1c22\] { background-color: #fff !important; color: #0f172a !important; }
 
 /* Surfaces & borders */
 .light-mode .rounded-xl.border-white\/\[0\.07\],

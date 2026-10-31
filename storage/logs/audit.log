@@ -338,3 +338,4 @@
 [2026-10-31 19:34:49] user=3 ip=::1 action=login details={"user":"bob@car.local"}
 [2026-10-31 19:35:03] user=3 ip=::1 action=logout details={"user":"bob@car.local"}
 [2026-10-31 19:35:15] user=1 ip=::1 action=login details={"user":"admin@car.local"}
+[2026-10-31 19:38:00] user=1 ip=::1 action=logout details={"user":"admin@car.local"}

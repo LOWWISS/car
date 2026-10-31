@@ -133,7 +133,7 @@ $sbSection = function (string $label, string $plusHref = '', string $plusTitle =
     </script>
 
     <!-- App CSS (reusable component classes via @apply) -->
-    <link rel="stylesheet" href="<?= e($assetBase) ?>/css/app.css?v=12">
+    <link rel="stylesheet" href="<?= e($assetBase) ?>/css/app.css?v=13">
 </head>
 <body class="h-full bg-slate-50 text-slate-800 font-sans antialiased min-h-screen">
 
