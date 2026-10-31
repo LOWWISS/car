@@ -326,3 +326,9 @@
 [2026-10-31 00:20:22] user=1 ip=::1 action=logout details={"user":"admin@car.local"}
 [2026-10-31 00:33:23] user=2 ip=::1 action=login details={"user":"jane@car.local"}
 [2026-10-31 00:33:29] user=2 ip=::1 action=logout details={"user":"jane@car.local"}
+[2026-10-31 19:06:07] user=2 ip=::1 action=login details={"user":"jane@car.local"}
+[2026-10-31 19:15:08] user=3 ip=::1 action=login details={"user":"bob@car.local"}
+[2026-10-31 19:21:46] user=3 ip=::1 action=authz_denied details={"required":["seller","admin"],"role":"buyer"}
+[2026-10-31 19:21:46] user=3 ip=::1 action=authz_denied details={"required":["admin"],"role":"buyer"}
+[2026-10-31 19:21:46] user=3 ip=::1 action=authz_denied details={"required":["admin"],"role":"buyer"}
+[2026-10-31 19:21:46] user=3 ip=::1 action=authz_denied details={"required":["admin"],"role":"buyer"}

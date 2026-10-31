@@ -52,6 +52,54 @@ final class DashboardController extends BaseController
         $totalSpent = $txModel->totalSpentByBuyer($uid);
         $spendBreakdown = $txModel->spendingBreakdownByBuyer($uid);
 
+        // ---- Buyer analytics (dark dashboard, mirrors the admin layout) ----
+        // Trends (last 30d vs prior 30d) + daily chart series via one PDO grab.
+        $pdo = Database::getInstance();
+        $pair = function (string $table, string $userCol, string $sumCol = null, string $extra = '') use ($pdo, $uid): array {
+            $cur  = $sumCol ? "COALESCE(SUM(CASE WHEN created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) THEN $sumCol END), 0)"
+                            : "SUM(CASE WHEN created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) THEN 1 ELSE 0 END)";
+            $prev = $sumCol ? "COALESCE(SUM(CASE WHEN created_at < DATE_SUB(CURDATE(), INTERVAL 30 DAY) THEN $sumCol END), 0)"
+                            : "SUM(CASE WHEN created_at < DATE_SUB(CURDATE(), INTERVAL 30 DAY) THEN 1 ELSE 0 END)";
+            $stmt = $pdo->prepare(
+                "SELECT $cur AS cur, $prev AS prev FROM $table
+                 WHERE $userCol = ? AND created_at >= DATE_SUB(CURDATE(), INTERVAL 60 DAY) $extra"
+            );
+            $stmt->execute([$uid]);
+            $row = $stmt->fetch();
+            return ['cur' => (float)($row['cur'] ?? 0), 'prev' => (float)($row['prev'] ?? 0)];
+        };
+
+        $bidPair   = $pair('bids', 'bidder_id');
+        $spendPair = $pair('transactions', 'winner_id', 'final_amount', 'AND status != "cancelled"');
+        $wonPair   = $pair('transactions', 'winner_id', null, 'AND status != "cancelled"');
+        $watchPair = $pair('watchlist', 'user_id');
+
+        // Daily bids + spend for the last 90 days (chart series).
+        $bidsByDay = $pdo->prepare(
+            "SELECT DATE(created_at) d, COUNT(*) c FROM bids
+             WHERE bidder_id = ? AND created_at >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)
+             GROUP BY DATE(created_at)"
+        );
+        $bidsByDay->execute([$uid]);
+        $bidsByDay = $bidsByDay->fetchAll(\PDO::FETCH_KEY_PAIR);
+        $spendByDay = $pdo->prepare(
+            "SELECT DATE(created_at) d, COALESCE(SUM(final_amount),0) c FROM transactions
+             WHERE winner_id = ? AND status != 'cancelled' AND created_at >= DATE_SUB(CURDATE(), INTERVAL 90 DAY)
+             GROUP BY DATE(created_at)"
+        );
+        $spendByDay->execute([$uid]);
+        $spendByDay = $spendByDay->fetchAll(\PDO::FETCH_KEY_PAIR);
+
+        $chart = [];
+        for ($i = 89; $i >= 0; $i--) {
+            $d = date('Y-m-d', strtotime("-$i days"));
+            $chart[] = [
+                'd'     => $d,
+                'bids'  => (int) ($bidsByDay[$d] ?? 0),
+                'spend' => round((float) ($spendByDay[$d] ?? 0) / 1000, 1), // ₱ thousands for scale
+            ];
+        }
+
         $this->view('dashboard/index', [
             'pageTitle'      => 'Dashboard',
             'stats'          => $stats,
@@ -62,6 +110,12 @@ final class DashboardController extends BaseController
             'totalSpent'     => $totalSpent,
             'spendBreakdown' => $spendBreakdown,
             'role'           => $role,
+            // dark dashboard additions
+            'trends'  => ['bids' => $bidPair, 'spend' => $spendPair, 'won' => $wonPair, 'watch' => $watchPair],
+            'chart'   => $chart,
+            'bids'    => array_slice($bidModel->bidsByBidder($uid), 0, 25),
+            'won'     => $recentWon,
+            'watch'   => array_slice($watchModel->forUser($uid), 0, 25),
         ]);
     }
 

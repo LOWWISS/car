@@ -197,7 +197,7 @@ $sbSection = function (string $label, string $plusHref = '', string $plusTitle =
         <?= $sbSection('My Account') ?>
         <div class="space-y-0.5">
           <?= $sbLink('/dashboard/won-auctions', 'Won Auctions', 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z', '', 'stagger-7') ?>
-          <?= $sbLink('/dashboard/watchlist', 'Watchlist', 'M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z', $sbBadge($sbWatch), 'stagger-8') ?>
+          <?= $sbLink('/watchlist', 'Watchlist', 'M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z', $sbBadge($sbWatch), 'stagger-8') ?>
           <?= $sbLink('/transactions', 'Transactions', 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z', '', 'stagger-9') ?>
         </div>
       </div>

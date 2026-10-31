@@ -48,7 +48,9 @@ final class Bid extends BaseModel
     {
         $stmt = $this->db->prepare(
             'SELECT b.*, c.title AS car_title, c.status AS car_status,
-                    c.auction_end, (SELECT image_path FROM car_images WHERE car_id = c.id AND is_primary = 1 LIMIT 1) AS primary_image
+                    c.auction_end, (SELECT image_path FROM car_images WHERE car_id = c.id AND is_primary = 1 LIMIT 1) AS primary_image,
+                    (SELECT MAX(bid_amount) FROM bids WHERE car_id = b.car_id) AS car_high,
+                    (SELECT COUNT(*) FROM bids WHERE car_id = b.car_id) AS car_bid_count
              FROM bids b INNER JOIN cars c ON c.id = b.car_id
              WHERE b.bidder_id = ?
              GROUP BY b.car_id, b.id
