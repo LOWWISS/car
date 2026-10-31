@@ -474,6 +474,22 @@
     submitViaPjax(form);
   });
 
+  // Theme toggle: [data-theme-toggle] flips light/dark, persists to localStorage.
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-theme-toggle]');
+    if (!t) return;
+    var on = document.documentElement.classList.toggle('light-mode');
+    localStorage.setItem('car_theme', on ? 'light' : 'dark');
+    document.querySelectorAll('.theme-sun').forEach(function (i) { i.classList.toggle('hidden', on); });
+    document.querySelectorAll('.theme-moon').forEach(function (i) { i.classList.toggle('hidden', !on); });
+  });
+  // Init icon state for the current theme
+  (function () {
+    var on = document.documentElement.classList.contains('light-mode');
+    document.querySelectorAll('.theme-sun').forEach(function (i) { i.classList.toggle('hidden', on); });
+    document.querySelectorAll('.theme-moon').forEach(function (i) { i.classList.toggle('hidden', !on); });
+  })();
+
   // Print buttons: [data-print] opens the browser print dialog.
   document.addEventListener('click', function (e) {
     if (e.target.closest('[data-print]')) window.print();

@@ -116,6 +116,7 @@ $sbSection = function (string $label, string $plusHref = '', string $plusTitle =
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Tailwind Play CDN (config applied below via nonce'd inline script) -->
+    <script nonce="<?= $nonce ?>">if (localStorage.getItem('car_theme') === 'light') document.documentElement.classList.add('light-mode');</script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script nonce="<?= e($nonce) ?>">
       tailwind.config = {
@@ -132,7 +133,7 @@ $sbSection = function (string $label, string $plusHref = '', string $plusTitle =
     </script>
 
     <!-- App CSS (reusable component classes via @apply) -->
-    <link rel="stylesheet" href="<?= e($assetBase) ?>/css/app.css?v=11">
+    <link rel="stylesheet" href="<?= e($assetBase) ?>/css/app.css?v=12">
 </head>
 <body class="h-full bg-slate-50 text-slate-800 font-sans antialiased min-h-screen">
 
@@ -277,6 +278,10 @@ $sbSection = function (string $label, string $plusHref = '', string $plusTitle =
 
       <?php if (Auth::check()): ?>
         <!-- Notifications bell -->
+        <button type="button" data-theme-toggle class="p-2 rounded-full hdr-icon-btn text-zinc-400 hover:bg-white/10 hover:text-white transition" aria-label="Toggle light mode" title="Toggle light/dark">
+          <svg class="w-5 h-5 theme-sun" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.36 6.36l-.7-.7M6.34 6.34l-.7-.7m12.72 0l-.7.7M6.34 17.66l-.7.7M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <svg class="w-5 h-5 theme-moon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.35 15.35A9 9 0 118.65 3.65 7 7 0 0020.35 15.35z"/></svg>
+        </button>
         <a href="<?= $appUrl ?>/notifications" class="relative p-2 rounded-full hdr-icon-btn text-zinc-400 hover:bg-white/10 hover:text-white transition" aria-label="Notifications">
           <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1"/>
