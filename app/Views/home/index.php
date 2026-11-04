@@ -308,7 +308,7 @@ $featuredCars = array_slice($featured ?? [], 0, 4);
 <section class="bg-white py-20 md:py-28">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center mb-14" data-reveal>
-      <span class="inline-block text-xs font-semibold tracking-widest uppercase text-blue-600 bg-blue-50 px-3 py-1 rounded-full">Why CarAuction</span>
+      <span class="inline-block text-xs font-semibold tracking-widest uppercase text-blue-600 bg-blue-50 px-3 py-1 rounded-full">Why Car Auction</span>
       <h2 class="mt-4 text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">Everything you need to bid with confidence</h2>
       <p class="mt-3 text-slate-600 max-w-xl mx-auto">A platform designed around trust, speed, and transparency.</p>
     </div>
