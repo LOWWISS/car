@@ -460,8 +460,6 @@ $featuredCars = array_slice($featured ?? [], 0, 4);
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-indigo-600 to-indigo-800 px-6 py-16 md:py-20 text-center shadow-2xl shadow-indigo-900/30" data-reveal>
       <div aria-hidden="true" class="pointer-events-none absolute inset-0">
-        <div class="absolute -top-24 left-1/4 w-96 h-96 rounded-full bg-white/10 blur-3xl"></div>
-        <div class="absolute -bottom-32 right-1/4 w-96 h-96 rounded-full bg-blue-400/20 blur-3xl"></div>
         <div class="absolute inset-0 opacity-[0.08]"
              style="background-image:linear-gradient(rgba(255,255,255,.4) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.4) 1px,transparent 1px);background-size:48px 48px;"></div>
       </div>
@@ -529,7 +527,7 @@ $featuredCars = array_slice($featured ?? [], 0, 4);
       </nav>
     </div>
   </div>
-  <div class="border-t border-white/10">
+  <div>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-2">
       <p class="text-xs text-slate-500">&copy; <?= date('Y') ?> <?= e(Config::get('APP_NAME', 'CarAuction')) ?>. All rights reserved.</p>
       <p class="text-xs text-slate-600">Bid smart. Drive happy.</p>
